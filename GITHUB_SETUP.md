@@ -19,8 +19,8 @@ Una vez creado el repositorio en GitHub, ejecuta estos comandos en la terminal:
 # Cambiar al directorio del proyecto
 cd "/Users/imaik/Documents/SHW-Reader"
 
-# Agregar el repositorio remoto (reemplaza 'yourusername' con tu usuario de GitHub)
-git remote add origin https://github.com/yourusername/SHW-Reader.git
+# Agregar el repositorio remoto
+git remote add origin https://github.com/Maikboarder/SHW-Reader.git
 
 # Subir el código a GitHub
 git push -u origin main
@@ -40,18 +40,17 @@ Para hacer más profesional la distribución:
 4. Release title: `SHW Reader v1.0.0 - Initial Release`
 5. Sube los archivos DMG desde la carpeta `dist/` si quieres distribuir binarios
 
-## URLs que Actualizar
+## URLs Actualizadas
 
-Después de crear el repositorio, actualiza estas URLs en el README.md:
-
-- Reemplaza `yourusername` con tu usuario real de GitHub
-- Reemplaza las URLs de Issues y Discussions con las reales
+✅ Las URLs ya están configuradas con tu usuario de GitHub: **Maikboarder**
+✅ Buy Me a Coffee prominentemente visible: https://buymeacoffee.com/maikboarder
 
 ## Estado Actual
 
 ✅ Repositorio Git inicializado
 ✅ Todos los archivos añadidos y committed
-✅ README.md profesional creado
+✅ README.md profesional creado con Buy Me a Coffee
+✅ Usuario GitHub configurado (Maikboarder)
 ✅ Licencia MIT añadida
 ✅ .gitignore configurado
 ✅ Proyecto listo para subir

@@ -6,6 +6,16 @@
   **Professional SHW File Viewer and Export Tool**
   
   *A multi-language Electron application for viewing and exporting Wireless Workbench SHW files*
+  
+  [![GitHub release](https://img.shields.io/github/release/Maikboarder/SHW-Reader.svg)](https://github.com/Maikboarder/SHW-Reader/releases)
+  [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+  [![macOS](https://img.shields.io/badge/platform-macOS-lightgrey.svg)](https://github.com/Maikboarder/SHW-Reader)
+  
+  **💖 Support the Project**
+  
+  [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support%20Development-orange?style=for-the-badge&logo=buy-me-a-coffee)](https://buymeacoffee.com/maikboarder)
+  
+  *If SHW Reader helps your workflow, consider supporting its development!*
 </div>
 
 ## 🌟 Features
@@ -27,7 +37,7 @@
 
 ### Installation
 
-1. **Download the latest release** from the [Releases](https://github.com/yourusername/SHW-Reader/releases) page
+1. **Download the latest release** from the [Releases](https://github.com/Maikboarder/SHW-Reader/releases) page
 2. **Install the app**:
    - For Apple Silicon Macs: Download `SHW-Reader-macOS-arm64.dmg`
    - For Intel Macs: Download `SHW-Reader-macOS-x64.dmg`
@@ -38,7 +48,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/SHW-Reader.git
+git clone https://github.com/Maikboarder/SHW-Reader.git
 cd SHW-Reader
 
 # Install dependencies
@@ -144,18 +154,32 @@ SHW-Reader/
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
+## � Support the Project
+
+If SHW Reader has been useful for your audio work, consider supporting its development:
+
+<div align="center">
+  <a href="https://buymeacoffee.com/maikboarder">
+    <img src="https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support%20Development-orange?style=for-the-badge&logo=buy-me-a-coffee" alt="Buy Me A Coffee">
+  </a>
+</div>
+
+Your support helps maintain and improve SHW Reader for the entire audio community! 🎵
+
+## �📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🐛 Issues & Support
 
-- **Bug Reports**: [GitHub Issues](https://github.com/yourusername/SHW-Reader/issues)
-- **Feature Requests**: [GitHub Discussions](https://github.com/yourusername/SHW-Reader/discussions)
+- **Bug Reports**: [GitHub Issues](https://github.com/Maikboarder/SHW-Reader/issues)
+- **Feature Requests**: [GitHub Discussions](https://github.com/Maikboarder/SHW-Reader/discussions)
 
 ---
 
 <div align="center">
   <strong>SHW Reader v1.0.0</strong><br>
   Made with ❤️ for the audio professional community
+  
+  **Created by [Maikboarder](https://github.com/Maikboarder)**
 </div>
