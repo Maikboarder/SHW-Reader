@@ -125,3 +125,6 @@ uploads/*
 
 # Build cache
 .cache/
+
+# Old files
+README_OLD.md
