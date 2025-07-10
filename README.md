@@ -18,7 +18,21 @@
   [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support%20Development-orange?style=for-the-badge&logo=buy-me-a-coffee)](https://buymeacoffee.com/maikboarder)
   
   *If SHW Reader helps your workflow, consider supporting its development!*
+  
+  **⬇️ Ready to use? Jump to [Quick Download](#-quick-start)**
 </div>
+
+## 🎯 **What is SHW Reader?**
+
+SHW Reader is a **free, professional tool** for audio engineers and technicians who work with **Shure Wireless Workbench** files. It lets you:
+
+- 📖 **View SHW files** in a clean, modern interface
+- ✏️ **Edit channel names and frequencies** directly
+- 📊 **Export to multiple formats**: CSV, Excel, Word, PDF
+- 🌍 **Use in your language**: 9 languages supported
+- 🎨 **Choose your theme**: Dark or light mode
+
+**Perfect for:** Live sound engineers, system integrators, audio consultants, and anyone working with wireless microphone coordination.
 
 ## 🌟 Features
 
@@ -33,18 +47,41 @@
 
 ## 🚀 Quick Start
 
+### 📥 **Direct Downloads** (Recommended for most users)
+
+<div align="center">
+
+**🍎 Choose your Mac type:**
+
+[![Download for Apple Silicon](https://img.shields.io/badge/Download%20for%20Apple%20Silicon-M1%2C%20M2%2C%20M3%20Macs-blue?style=for-the-badge&logo=apple)](https://github.com/Maikboarder/SHW-Reader/releases/latest/download/SHW-Reader-macOS-arm64.dmg)
+
+[![Download for Intel Macs](https://img.shields.io/badge/Download%20for%20Intel%20Macs-Intel%20Processor-lightgrey?style=for-the-badge&logo=intel)](https://github.com/Maikboarder/SHW-Reader/releases/latest/download/SHW-Reader-macOS-x64.dmg)
+
+**❓ Not sure which Mac you have?**
+- **Apple Silicon** (M1, M2, M3): Most Macs from 2021 onwards
+- **Intel**: Most Macs from 2020 and earlier
+- Check: Apple Menu → About This Mac
+
+</div>
+
 ### Prerequisites
 - macOS 10.14 or later
 - Python 3.8 or later
 
 ### Installation
 
-1. **Download the latest release** from the [Releases](https://github.com/Maikboarder/SHW-Reader/releases) page
-2. **Install the app**:
-   - For Apple Silicon Macs: Download `SHW-Reader-macOS-arm64.dmg`
-   - For Intel Macs: Download `SHW-Reader-macOS-x64.dmg`
-3. **Open the DMG** and drag SHW Reader to Applications
+1. **Download the DMG** using the buttons above
+2. **Open the downloaded DMG file**
+3. **Drag SHW Reader to Applications folder**
 4. **Launch** SHW Reader from Applications
+5. **Allow permissions** if macOS asks (it's safe!)
+
+### Alternative: GitHub Releases
+
+1. **Browse all releases** at [Releases](https://github.com/Maikboarder/SHW-Reader/releases) page
+2. **Download the appropriate file**:
+   - For Apple Silicon Macs: `SHW-Reader-macOS-arm64.dmg`
+   - For Intel Macs: `SHW-Reader-macOS-x64.dmg`
 
 ### Development Setup
 
@@ -174,8 +211,27 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🐛 Issues & Support
 
-- **Bug Reports**: [GitHub Issues](https://github.com/Maikboarder/SHW-Reader/issues)
-- **Feature Requests**: [GitHub Discussions](https://github.com/Maikboarder/SHW-Reader/discussions)
+### 📞 **Need Help?**
+
+- **📧 Email Support**: [maikboarder@gmail.com](mailto:maikboarder@gmail.com)
+- **🐞 Bug Reports**: [GitHub Issues](https://github.com/Maikboarder/SHW-Reader/issues)
+- **💡 Feature Requests**: [GitHub Discussions](https://github.com/Maikboarder/SHW-Reader/discussions)
+
+### 🆘 **Common Issues**
+
+**Q: "SHW Reader can't be opened because it's from an unidentified developer"**
+- **Solution**: Right-click the app → Open → Open anyway
+
+**Q: "Python not found" error**
+- **Solution**: Install Python from [python.org](https://www.python.org/downloads/macos/)
+
+**Q: "Which version should I download?"**
+- **M1/M2/M3 Mac**: Download Apple Silicon version
+- **Intel Mac**: Download Intel version
+- **Check**: Apple Menu → About This Mac
+
+**Q: App won't start or crashes**
+- **Solution**: Try the other version (Intel/Silicon) or contact support
 
 ---
 
