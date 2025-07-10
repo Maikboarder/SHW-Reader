@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Languages - SHW Reader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .debug-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #333;
+            border-radius: 5px;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 3px;
+            background: #333;
+        }
+        .success { background: #4caf50; }
+        .error { background: #f44336; }
+        .warning { background: #ff9800; }
+        select {
+            padding: 5px;
+            margin: 10px;
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+        }
+        button {
+            padding: 8px 15px;
+            margin: 5px;
+            background: #007acc;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #005a9e;
+        }
+        .test-element {
+            margin: 10px 0;
+            padding: 10px;
+            background: #333;
+            border-left: 3px solid #007acc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug Sistema de Idiomas - SHW Reader</h1>
+    
+    <div class="debug-section">
+        <h2>1. Test de APIs del Backend</h2>
+        <button onclick="testBackendAPIs()">Probar APIs</button>
+        <div id="api-results"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>2. Test de Carga de Idiomas</h2>
+        <button onclick="testLanguageLoading()">Cargar Idiomas</button>
+        <div id="language-results"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>3. Test de Selector de Idioma</h2>
+        <select id="languageSelect" onchange="changeLanguage(this.value)">
+            <option value="">Cargando...</option>
+        </select>
+        <div id="selector-results"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>4. Elementos de Prueba para Traducción</h2>
+        <div class="test-element">
+            <span data-i18n="app_title">Título de la App</span>
+        </div>
+        <div class="test-element">
+            <span data-i18n="export_button">Botón de Exportar</span>
+        </div>
+        <div class="test-element">
+            <span data-i18n="file_info.devices">Dispositivos</span>
+        </div>
+        <div class="test-element">
+            <span data-i18n="language_selector">Selector de Idioma</span>
+        </div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>5. Estado Actual</h2>
+        <div id="current-state">
+            <p>Idioma actual: <span id="current-lang">-</span></p>
+            <p>Traducciones cargadas: <span id="translations-count">-</span></p>
+            <p>Idiomas disponibles: <span id="available-count">-</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let currentLanguage = 'es';
+        let translations = {};
+        let availableLanguages = [];
+
+        // Funciones de utilidad
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            console.log(`[${timestamp}] ${message}`);
+            
+            // También mostrar en la interfaz
+            const resultDiv = document.getElementById('api-results');
+            if (resultDiv) {
+                resultDiv.innerHTML += `<div class="status ${type}">[${timestamp}] ${message}</div>`;
+            }
+        }
+
+        function updateStatus() {
+            document.getElementById('current-lang').textContent = currentLanguage;
+            document.getElementById('translations-count').textContent = Object.keys(translations).length;
+            document.getElementById('available-count').textContent = availableLanguages.length;
+        }
+
+        // Test 1: APIs del Backend
+        async function testBackendAPIs() {
+            const resultsDiv = document.getElementById('api-results');
+            resultsDiv.innerHTML = '<div class="status">Probando APIs...</div>';
+            
+            try {
+                // Test API de idiomas
+                log('🔍 Probando /api/languages...');
+                const langResponse = await fetch('/api/languages');
+                if (langResponse.ok) {
+                    const langData = await langResponse.json();
+                    log(`✅ API de idiomas OK: ${langData.languages.length} idiomas encontrados`, 'success');
+                    availableLanguages = langData.languages;
+                    populateLanguageSelector();
+                } else {
+                    throw new Error(`Error HTTP: ${langResponse.status}`);
+                }
+                
+                // Test API de traducciones
+                log('🔍 Probando /api/translations/es...');
+                const transResponse = await fetch('/api/translations/es');
+                if (transResponse.ok) {
+                    const transData = await transResponse.json();
+                    log(`✅ API de traducciones OK: ${Object.keys(transData).length} claves encontradas`, 'success');
+                } else {
+                    throw new Error(`Error HTTP: ${transResponse.status}`);
+                }
+                
+            } catch (error) {
+                log(`❌ Error en APIs: ${error.message}`, 'error');
+            }
+            
+            updateStatus();
+        }
+
+        // Test 2: Carga de Idiomas
+        async function testLanguageLoading() {
+            const resultsDiv = document.getElementById('language-results');
+            resultsDiv.innerHTML = '<div class="status">Cargando idiomas...</div>';
+            
+            try {
+                for (const lang of ['es', 'en', 'fr']) {
+                    log(`🔄 Cargando traducciones para: ${lang}`);
+                    const response = await fetch(`/api/translations/${lang}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        log(`✅ ${lang}: ${Object.keys(data).length} traducciones cargadas`, 'success');
+                        if (lang === currentLanguage) {
+                            translations = data;
+                        }
+                    } else {
+                        log(`❌ Error cargando ${lang}: ${response.status}`, 'error');
+                    }
+                }
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+            }
+            
+            updateStatus();
+        }
+
+        // Poblar selector de idiomas
+        function populateLanguageSelector() {
+            const select = document.getElementById('languageSelect');
+            select.innerHTML = '';
+            
+            availableLanguages.forEach(lang => {
+                const option = document.createElement('option');
+                option.value = lang.code;
+                option.textContent = `${lang.flag} ${lang.nativeName}`;
+                if (lang.code === currentLanguage) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        }
+
+        // Obtener traducción
+        function getTranslation(key) {
+            const keys = key.split('.');
+            let translation = translations;
+            
+            for (const k of keys) {
+                if (translation && typeof translation === 'object' && k in translation) {
+                    translation = translation[k];
+                } else {
+                    return key; // Fallback: devolver la clave
+                }
+            }
+            
+            return translation;
+        }
+
+        // Aplicar traducciones
+        function applyTranslations() {
+            log(`🔄 Aplicando traducciones para: ${currentLanguage}`);
+            
+            const elements = document.querySelectorAll('[data-i18n]');
+            log(`🔍 Encontrados ${elements.length} elementos para traducir`);
+            
+            elements.forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                const translation = getTranslation(key);
+                
+                if (translation && translation !== key) {
+                    element.textContent = translation;
+                    log(`✅ Traducido "${key}" -> "${translation}"`, 'success');
+                } else {
+                    log(`⚠️ No se encontró traducción para: ${key}`, 'warning');
+                }
+            });
+            
+            updateStatus();
+        }
+
+        // Cambiar idioma
+        async function changeLanguage(newLang) {
+            if (!newLang || newLang === currentLanguage) {
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('selector-results');
+            resultsDiv.innerHTML = `<div class="status">Cambiando a ${newLang}...</div>`;
+            
+            try {
+                log(`🔄 Cambiando idioma de ${currentLanguage} a ${newLang}`);
+                
+                currentLanguage = newLang;
+                localStorage.setItem('app-language', newLang);
+                
+                // Cargar nuevas traducciones
+                const response = await fetch(`/api/translations/${newLang}`);
+                if (response.ok) {
+                    translations = await response.json();
+                    log(`✅ Traducciones cargadas para ${newLang}`, 'success');
+                } else {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                
+                // Aplicar traducciones
+                applyTranslations();
+                
+                resultsDiv.innerHTML += `<div class="status success">✅ Idioma cambiado a ${newLang}</div>`;
+                
+            } catch (error) {
+                log(`❌ Error cambiando idioma: ${error.message}`, 'error');
+                resultsDiv.innerHTML += `<div class="status error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🎯 Debug de idiomas inicializado');
+            updateStatus();
+            
+            // Auto-test al cargar
+            setTimeout(() => {
+                testBackendAPIs();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

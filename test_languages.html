@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHW Reader - Test de Idiomas</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            background: #0d1117;
+            color: #f0f6fc;
+            margin: 20px;
+        }
+        
+        .language-selector {
+            margin: 20px 0;
+        }
+        
+        .language-select {
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #f0f6fc;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+        }
+        
+        .translatable {
+            margin: 10px 0;
+            padding: 5px;
+            background: #161b22;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎤 SHW Reader - Prueba de Multilenguaje</h1>
+    
+    <div class="language-selector">
+        <label for="languageSelect">Idioma:</label>
+        <select id="languageSelect" onchange="changeLanguage(this.value)">
+            <option value="es">🇪🇸 Español</option>
+            <option value="en">🇺🇸 English</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="de">🇩🇪 Deutsch</option>
+        </select>
+    </div>
+    
+    <div class="test-section">
+        <h2>Elementos Traducibles:</h2>
+        <div class="translatable" data-i18n="file_info.devices">Dispositivos</div>
+        <div class="translatable" data-i18n="file_info.channels">Canales</div>
+        <div class="translatable" data-i18n="table_headers.channel">Nombre del Canal</div>
+        <div class="translatable" data-i18n="table_headers.frequency">Frecuencia</div>
+        <div class="translatable" data-i18n="table_headers.rf_zone">RF Zone</div>
+        <div class="translatable" data-i18n="table_headers.device_model">Dispositivo / Modelo</div>
+        <div class="translatable" data-i18n="table_headers.band">Banda</div>
+    </div>
+    
+    <div id="status" style="margin: 20px 0; padding: 10px; background: #161b22; border-radius: 4px;"></div>
+
+    <script>
+        let currentLanguage = 'es';
+        let translations = {};
+        
+        // Traducciones hardcoded para prueba
+        const hardcodedTranslations = {
+            es: {
+                'file_info.devices': 'Dispositivos',
+                'file_info.channels': 'Canales',
+                'table_headers.channel': 'Nombre del Canal',
+                'table_headers.frequency': 'Frecuencia',
+                'table_headers.rf_zone': 'RF Zone',
+                'table_headers.device_model': 'Dispositivo / Modelo',
+                'table_headers.band': 'Banda'
+            },
+            en: {
+                'file_info.devices': 'Devices',
+                'file_info.channels': 'Channels',
+                'table_headers.channel': 'Channel Name',
+                'table_headers.frequency': 'Frequency',
+                'table_headers.rf_zone': 'RF Zone',
+                'table_headers.device_model': 'Device / Model',
+                'table_headers.band': 'Band'
+            },
+            fr: {
+                'file_info.devices': 'Appareils',
+                'file_info.channels': 'Canaux',
+                'table_headers.channel': 'Nom du Canal',
+                'table_headers.frequency': 'Fréquence',
+                'table_headers.rf_zone': 'Zone RF',
+                'table_headers.device_model': 'Appareil / Modèle',
+                'table_headers.band': 'Bande'
+            },
+            de: {
+                'file_info.devices': 'Geräte',
+                'file_info.channels': 'Kanäle',
+                'table_headers.channel': 'Kanalname',
+                'table_headers.frequency': 'Frequenz',
+                'table_headers.rf_zone': 'RF-Zone',
+                'table_headers.device_model': 'Gerät / Modell',
+                'table_headers.band': 'Band'
+            }
+        };
+        
+        function getTranslation(key) {
+            const keys = key.split('.');
+            let translation = hardcodedTranslations[currentLanguage] || hardcodedTranslations['es'];
+            
+            for (const k of keys) {
+                if (translation && typeof translation === 'object' && k in translation) {
+                    translation = translation[k];
+                } else {
+                    return key;
+                }
+            }
+            
+            return translation || key;
+        }
+        
+        function applyTranslations() {
+            console.log(`Aplicando traducciones para: ${currentLanguage}`);
+            
+            const elements = document.querySelectorAll('[data-i18n]');
+            console.log(`Encontrados ${elements.length} elementos`);
+            
+            elements.forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                const translation = getTranslation(key);
+                
+                console.log(`${key} -> ${translation}`);
+                element.textContent = translation;
+            });
+            
+            // Actualizar status
+            document.getElementById('status').textContent = `Idioma actual: ${currentLanguage}`;
+        }
+        
+        function changeLanguage(newLang) {
+            console.log(`Cambiando idioma a: ${newLang}`);
+            currentLanguage = newLang;
+            localStorage.setItem('app-language', newLang);
+            applyTranslations();
+        }
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedLang = localStorage.getItem('app-language') || 'es';
+            currentLanguage = savedLang;
+            document.getElementById('languageSelect').value = savedLang;
+            applyTranslations();
+        });
+    </script>
+</body>
+</html>

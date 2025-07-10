@@ -1,0 +1,123 @@
+{
+  "name": "shw-reader-macos",
+  "version": "1.0.0",
+  "description": "SHW Reader - Lector de Archivos Wireless Workbench para macOS",
+  "main": "electron-main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:mac": "electron-builder --mac",
+    "build:mac-intel": "electron-builder --mac --x64",
+    "build:mac-silicon": "electron-builder --mac --arm64",
+    "build:mac-universal": "electron-builder --mac --universal",
+    "dist": "electron-builder --publish=never",
+    "dist:mac": "electron-builder --mac --publish=never",
+    "dist:mac-intel": "electron-builder --mac --x64 --publish=never",
+    "dist:mac-silicon": "electron-builder --mac --arm64 --publish=never",
+    "dist:mac-universal": "electron-builder --mac --universal --publish=never",
+    "pack": "electron-builder --dir"
+  },
+  "keywords": [
+    "audio",
+    "wireless",
+    "workbench",
+    "shw",
+    "frequency",
+    "macos"
+  ],
+  "author": "SHW Reader Team",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.shwreader.app",
+    "productName": "SHW Reader",
+    "generateUpdatesFilesForAllChannels": false,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron-main.js",
+      "preload.js",
+      "app_desktop.py",
+      "templates/**/*",
+      "static/**/*",
+      "uploads/**/*",
+      "translations/**/*",
+      "assets/**/*",
+      "package.json",
+      "requirements.txt"
+    ],
+    "extraResources": [
+      {
+        "from": "app_desktop.py",
+        "to": "app/app_desktop.py"
+      },
+      {
+        "from": "templates",
+        "to": "app/templates"
+      },
+      {
+        "from": "static",
+        "to": "app/static"
+      },
+      {
+        "from": "uploads",
+        "to": "app/uploads"
+      },
+      {
+        "from": "translations",
+        "to": "app/translations"
+      }
+    ],
+    "mac": {
+      "icon": "assets/mac/SHW Reader.icns",
+      "category": "public.app-category.utilities",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "darkModeSupport": true,
+      "minimumSystemVersion": "10.15.0",
+      "entitlements": "assets/entitlements.mac.plist",
+      "entitlementsInherit": "assets/entitlements.mac.plist",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false
+    },
+    "dmg": {
+      "title": "SHW Reader Installer",
+      "icon": "assets/mac/SHW Reader.icns",
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ],
+      "window": {
+        "width": 540,
+        "height": 380
+      },
+      "backgroundColor": "#1a1a1a"
+    }
+  }
+}

@@ -1,0 +1,2232 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHW Reader</title>
+    
+    <!-- Favicons y iconos para diferentes plataformas -->
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="128x128" href="/static/logo.png">
+    <link rel="icon" sizes="512x512" href="/static/icon-512x512.png">
+    <meta name="theme-color" content="#0d1117">
+    
+    <script>
+        // Aplicar tema e idioma inmediatamente para evitar flash
+        (function() {
+            const theme = localStorage.getItem('app-theme') || 'dark';
+            const language = localStorage.getItem('app-language') || 'es';
+            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.setAttribute('lang', language);
+            // También establecer el título correcto inmediatamente
+            const titleSuffix = theme === 'dark' ? ' - Modo Oscuro' : ' - Modo Claro';
+            document.title = 'SHW Reader' + titleSuffix;
+        })();
+    </script>
+    <style>
+        /* Variables CSS para tema oscuro (por defecto) */
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --text-accent: #58a6ff;
+            --border-color: #30363d;
+            --success-color: #4caf50;
+            --error-color: #f44336;
+            --warning-color: #ff9800;
+            --hover-color: rgba(255, 255, 255, 0.05);
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Variables CSS para tema claro */
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f6f8fa;
+            --bg-tertiary: #f1f3f4;
+            --text-primary: #24292f;
+            --text-secondary: #656d76;
+            --text-accent: #0969da;
+            --border-color: #d0d7de;
+            --success-color: #1a7f37;
+            --error-color: #cf222e;
+            --warning-color: #bf8700;
+            --hover-color: #f3f4f6;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* SF Pro específico para diferentes elementos */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-weight: 600;
+            letter-spacing: -0.022em; /* Ajuste tipográfico de SF Pro */
+        }
+
+        .btn, button, input, select, textarea {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-weight: 400;
+        }
+
+        .table, table, th, td {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-weight: 400;
+        }
+
+        /* SF Mono para elementos de código */
+        code, pre, .code {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', 'Courier New', monospace;
+            font-weight: 400;
+        }
+
+        /* Ajustes específicos para el encabezado principal */
+        .header-title h1 {
+            font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            /* Espacio dinámico para header - se ajusta automáticamente */
+            padding-top: 130px; /* Incrementado para mayor seguridad */
+        }
+
+        .header {
+            text-align: center;
+            padding: 15px 25px;
+            background: var(--bg-secondary);
+            border-radius: 0;
+            box-shadow: var(--shadow);
+            border-bottom: 1px solid var(--border-color);
+            /* Header completamente fijo con z-index alto */
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1100; /* Z-index más alto para estar por encima de todo */
+            margin: 0;
+            backdrop-filter: blur(15px);
+            /* Asegurar que el header siempre esté visible */
+            min-height: 120px; /* Altura mínima garantizada */
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header-title {
+            text-align: left;
+            flex: 1;
+            display: flex;
+            align-items: flex-end; /* Cambiar a flex-end para alinear hacia abajo */
+            gap: 6px; /* Reducir gap de 12px a 6px para estar más pegados */
+        }
+
+        .header-title h1 {
+            margin: 0; /* Asegurar que no hay márgenes que desalineen */
+            padding: 0;
+            font-weight: 700; /* Asegurar negrita también aquí */
+        }
+
+        .header-logo {
+            height: 64px;
+            width: auto;
+            object-fit: contain;
+            transition: transform 0.2s ease;
+            align-self: flex-end; /* Alinear el icono también hacia abajo */
+            margin-bottom: 2px; /* Pequeño ajuste para alineación perfecta */
+        }
+
+        .header-logo:hover {
+            transform: scale(1.05);
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .stat-item {
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--text-accent);
+            line-height: 1;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 2px;
+        }
+
+        .table-header-fixed {
+            margin-top: 15px;
+            border-top: 2px solid var(--text-accent);
+            padding-top: 15px;
+        }
+
+        .table-header-content {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .th-cell {
+            padding: 12px 15px;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            border-right: 1px solid var(--border-color);
+            text-align: left;
+            transition: color 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        .th-cell:hover {
+            background: var(--hover-color);
+            color: var(--text-accent);
+        }
+
+        .th-cell.sortable::after {
+            content: ' ↕️';
+            font-size: 0.8rem;
+            opacity: 0.5;
+            margin-left: 5px;
+        }
+
+        .th-cell.sorted-asc::after {
+            content: ' ↑';
+            color: var(--text-accent);
+            opacity: 1;
+        }
+
+        .th-cell.sorted-desc::after {
+            content: ' ↓';
+            color: var(--text-accent);
+            opacity: 1;
+        }
+
+        .th-cell:last-child {
+            border-right: none;
+        }
+
+
+
+        .th-device {
+            flex: 2;
+            min-width: 200px;
+        }
+
+        .th-channel {
+            flex: 2;
+            min-width: 180px;
+        }
+
+        .th-frequency {
+            flex: 1.5;
+            min-width: 120px;
+        }
+
+        .th-zone {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .th-band {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700; /* Cambiar de 300 (light) a 700 (bold) */
+            margin: 0;
+            color: var(--text-accent); /* Cambiar de --text-primary a --text-accent */
+            line-height: 1;
+            padding-bottom: 8px; /* Añadir padding inferior para bajar el texto */
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-input {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-label {
+            background: linear-gradient(45deg, var(--text-accent), #42a5f5);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow);
+            border: none;
+        }
+
+        .file-label:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            background: linear-gradient(45deg, #42a5f5, var(--text-accent));
+        }
+
+        .btn {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 510; /* Optimizado para SF Pro */
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            letter-spacing: -0.01em; /* Ajuste tipográfico SF Pro */
+        }
+
+        .btn:hover {
+            background: var(--hover-color);
+            transform: translateY(-1px);
+            border-color: var(--text-accent);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, var(--success-color), #66bb6a);
+            border-color: var(--success-color);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, var(--error-color), #ef5350);
+            border-color: var(--error-color);
+        }
+
+        /* Estilos para el dropdown de exportación */
+        .export-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .export-main-btn {
+            background: linear-gradient(45deg, var(--success-color), #66bb6a);
+            border-color: var(--success-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .export-dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--bg-tertiary);
+            min-width: 200px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            z-index: 1000;
+            top: 100%;
+            left: 0;
+            overflow: hidden;
+        }
+
+        .export-dropdown-content a {
+            color: var(--text-primary);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.2s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .export-dropdown-content a:hover {
+            background-color: var(--hover-color);
+            color: var(--text-accent);
+        }
+
+        .export-dropdown.show .export-dropdown-content {
+            display: block;
+        }
+
+        .status {
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .status.show {
+            display: flex;
+        }
+
+        .status.success {
+            background: rgba(26, 127, 55, 0.1);
+            border: 1px solid var(--success-color);
+            color: var(--success-color);
+        }
+
+        .status.error {
+            background: rgba(207, 34, 46, 0.1);
+            border: 1px solid var(--error-color);
+            color: var(--error-color);
+        }
+
+        .status.info {
+            background: rgba(9, 105, 218, 0.1);
+            border: 1px solid var(--text-accent);
+            color: var(--text-accent);
+        }
+
+        /* Ajustar colores de status para tema oscuro */
+        [data-theme="dark"] .status.success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #a5d6a7;
+        }
+
+        [data-theme="dark"] .status.error {
+            background: rgba(244, 67, 54, 0.2);
+            color: #ef9a9a;
+        }
+
+        [data-theme="dark"] .status.info {
+            background: rgba(100, 181, 246, 0.2);
+            color: #90caf9;
+        }
+
+        .table-container {
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+            /* Altura optimizada para el scroll - usa espacio disponible */
+            flex: 1;
+            min-height: 400px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            /* Margen superior para separarse del header fijo */
+            margin-top: 20px;
+            /* Z-index menor que el header */
+            z-index: 100;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .table-wrapper {
+            flex: 1;
+            overflow: auto;
+            /* Scroll suave con contenido interno */
+            scroll-behavior: smooth;
+            position: relative;
+        }
+
+        /* Mejoras para el scrollbar en webkit */
+        .table-wrapper::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: var(--text-accent);
+        }
+
+        /* Renderizado MÍNIMO para evitar memory tiles exceeded */
+        tr {
+            height: 58px; /* Altura fija para cálculos de virtualización */
+        }
+
+        /* Optimización para scroll suave */
+        .table-wrapper {
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
+            scrollbar-width: thin;
+        }
+
+        /* Evitar re-layout durante scroll */
+        tbody tr {
+            height: 58px; /* Altura fija para cálculos de virtualización */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed; /* Importante para mantener anchos consistentes */
+            font-variant-numeric: tabular-nums; /* Optimización SF Pro para números */
+        }
+
+        /* Anchos específicos para las columnas de la tabla */
+        table td:nth-child(1) {
+            width: calc(2 * 100% / 6.5); /* Channel - flex: 2 */
+        }
+
+        table td:nth-child(2) {
+            width: calc(1.5 * 100% / 6.5); /* Frequency - flex: 1.5 */
+        }
+
+        table td:nth-child(3) {
+            width: calc(1 * 100% / 6.5); /* Zone - flex: 1 */
+        }
+
+        table td:nth-child(4) {
+            width: calc(2 * 100% / 6.5); /* Device - flex: 2 */
+        }
+
+        table td:nth-child(5) {
+            width: calc(1 * 100% / 6.5); /* Band - flex: 1 */
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            padding: 18px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--bg-tertiary);
+            transition: all 0.3s ease;
+        }
+
+        th:first-child {
+            padding-left: 25px;
+        }
+
+        th:last-child {
+            padding-right: 25px;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+            font-weight: 400; /* Optimizado para SF Pro Text */
+            letter-spacing: -0.008em; /* Ajuste tipográfico SF Pro */
+        }
+
+        td:first-child {
+            padding-left: 25px;
+            font-weight: 510; /* Optimizado para SF Pro - peso medio */
+        }
+
+        td:nth-child(4) {
+            font-weight: 500; /* Dispositivo ahora es la cuarta columna, mantener peso */
+            color: var(--text-accent);
+        }
+
+        td:last-child {
+            padding-right: 25px;
+        }
+
+        tr:hover td {
+            background: rgba(9, 105, 218, 0.05);
+        }
+        
+        [data-theme="dark"] tr:hover td {
+            background: rgba(47, 129, 247, 0.1);
+        }
+
+        /* Estilos para filas seleccionadas - sin checkboxes pero con resaltado visual */
+        tr.selected td {
+            background: rgba(9, 105, 218, 0.15) !important;
+            border-color: var(--text-accent);
+            box-shadow: inset 2px 0 0 var(--text-accent);
+        }
+
+        [data-theme="dark"] tr.selected td {
+            background: rgba(47, 129, 247, 0.2) !important;
+            border-color: var(--text-accent);
+        }
+
+        /* Disable text selection for better UX with keyboard shortcuts */
+        tbody tr {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        /* Re-enable text selection for editable cells */
+        .editable {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+
+        /* Visual feedback for clickable rows */
+        tbody tr:hover {
+            background: rgba(9, 105, 218, 0.08) !important;
+        }
+
+        [data-theme="dark"] tbody tr:hover {
+            background: rgba(47, 129, 247, 0.12) !important;
+        }
+
+        .editable {
+            cursor: pointer;
+            position: relative;
+            border-radius: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .editable:hover {
+            background: rgba(9, 105, 218, 0.1);
+            border: 1px solid rgba(9, 105, 218, 0.3);
+        }
+
+        [data-theme="dark"] .editable:hover {
+            background: rgba(47, 129, 247, 0.15);
+            border: 1px solid rgba(47, 129, 247, 0.4);
+        }
+
+        .editable.editing {
+            background: rgba(9, 105, 218, 0.15);
+            border: 1px solid var(--text-accent);
+        }
+
+        .edit-input {
+            background: var(--bg-tertiary);
+            border: 2px solid var(--text-accent);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 5px;
+            width: 100%;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .edit-input:focus {
+            outline: none;
+            border-color: #42a5f5;
+            box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+        }
+
+        .device-name {
+            color: var(--text-accent);
+            font-weight: 500;
+        }
+
+        /* Aplicar estilo de dispositivo a la cuarta columna */
+        td:nth-child(4).device-name {
+            color: var(--text-accent);
+            font-weight: 500;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .loading {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .loading.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(9, 105, 218, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--text-accent);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .drag-over {
+            border: 2px dashed var(--text-accent);
+            background: rgba(9, 105, 218, 0.1);
+        }
+
+        [data-theme="dark"] .drag-over {
+            background: rgba(47, 129, 247, 0.15);
+        }
+
+        .frequency-unit {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-left: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+                /* Espacio ajustado para móviles con header integrado - AUMENTADO */
+                padding-top: 160px; /* Más espacio en móviles donde el header es más alto */
+            }
+
+            .header {
+                padding: 12px 15px;
+                /* Altura mínima mayor en móviles */
+                min-height: 140px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .header-title {
+                text-align: center;
+                justify-content: center;
+            }
+
+            .header-logo {
+                height: 56px; /* Más grande y proporcional en móviles */
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header-stats {
+                gap: 20px;
+                justify-content: center;
+                flex-direction: column;
+                align-items: flex-end;
+            }
+
+            .stat-item {
+                min-width: 60px;
+            }
+
+            .stat-number {
+                font-size: 1.5rem;
+            }
+
+            .stat-label {
+                font-size: 0.8rem;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .file-label, .btn {
+                justify-content: center;
+                text-align: center;
+            }
+
+            th, td {
+                padding: 10px 6px;
+                font-size: 0.85rem;
+            }
+
+            th:first-child, td:first-child {
+                padding-left: 12px;
+            }
+
+            th:last-child, td:last-child {
+                padding-right: 12px;
+            }
+
+            .table-container {
+                min-height: 300px;
+            }
+
+            .table-header-content {
+                overflow-x: auto;
+                min-width: 600px; /* Ancho mínimo para scroll horizontal en móviles */
+            }
+        }
+
+        /* Menú contextual */
+        .context-menu {
+            position: fixed;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            padding: 5px 0;
+            z-index: 1200;
+            min-width: 200px;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .context-menu-item {
+            padding: 10px 15px;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s ease;
+        }
+
+        .context-menu-item:hover {
+            background: var(--hover-color);
+        }
+
+        .context-menu-item.danger {
+            color: var(--error-color);
+        }
+
+        .context-menu-item.danger:hover {
+            background: rgba(244, 67, 54, 0.1);
+        }
+
+        .context-menu-separator {
+            height: 1px;
+            background: var(--border-color);
+            margin: 5px 0;
+        }
+
+        .context-menu-item.disabled {
+            color: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        .context-menu-item.disabled:hover {
+            background: transparent;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div class="header-title">
+                    <img src="/static/logo.png" alt="SHW Reader Logo" class="header-logo">
+                    <h1>SHW Reader</h1>
+                </div>
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="deviceCount">0</div>
+                        <div class="stat-label" data-i18n="file_info.devices">Dispositivos</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="channelCount">0</div>
+                        <div class="stat-label" data-i18n="file_info.channels">Canales</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Cabecera fija de la tabla integrada en el header -->
+            <div class="table-header-fixed">
+                <div class="table-header-content">
+                    <div class="th-cell th-channel sortable" data-sort="channel" onclick="sortTable('channel')" data-i18n="table_headers.channel">Nombre del Canal</div>
+                    <div class="th-cell th-frequency sortable" data-sort="frequency" onclick="sortTable('frequency')" data-i18n="table_headers.frequency">Frecuencia</div>
+                    <div class="th-cell th-zone sortable" data-sort="zone" onclick="sortTable('zone')" data-i18n="table_headers.rf_zone">RF Zone</div>
+                    <div class="th-cell th-device sortable" data-sort="device" onclick="sortTable('device')" data-i18n="table_headers.device_model">Dispositivo / Modelo</div>
+                    <div class="th-cell th-band sortable" data-sort="band" onclick="sortTable('band')" data-i18n="table_headers.band">Banda</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <!-- Controles de exportación visibles -->
+            <div class="file-input-wrapper" style="display: none;">
+                <input type="file" id="fileInput" class="file-input" accept=".shw">
+                <label for="fileInput" class="file-label" data-i18n="upload_button">
+                    📁 Seleccionar archivo .shw
+                </label>
+            </div>
+            
+            <!-- Dropdown para exportación -->
+            <div class="export-dropdown">
+                <button class="btn btn-success export-main-btn" onclick="toggleExportDropdown()">
+                    💾 <span data-i18n="export.csv">Exportar CSV</span> ▼
+                </button>
+                <div class="export-dropdown-content" id="exportDropdown">
+                    <a href="#" onclick="exportData('csv')" data-i18n="export.csv">💾 Exportar CSV</a>
+                    <a href="#" onclick="exportData('excel')" data-i18n="export.excel">📊 Exportar Excel</a>
+                    <a href="#" onclick="exportData('word')" data-i18n="export.word">📝 Exportar Word</a>
+                    <a href="#" onclick="exportData('pdf')" data-i18n="export.pdf">📋 Exportar PDF</a>
+                </div>
+            </div>
+            
+            <button class="btn btn-danger" onclick="deleteSelected()" data-i18n="delete_selected_button" style="display: none;">
+                🗑️ Eliminar Seleccionados
+            </button>
+            <button class="btn btn-danger" onclick="clearTable()" data-i18n="clear_button" style="display: none;">
+                🧹 Limpiar tabla
+            </button>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+        </div>
+
+        <div class="table-container">
+            <div class="table-wrapper">
+                <table id="dataTable">
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="5" class="empty-state">
+                                <div class="empty-state-icon" data-i18n="ui.empty_state_icon">📄</div>
+                                <h3 data-i18n="ui.no_data_loaded">No hay datos cargados</h3>
+                                <p data-i18n="ui.select_file_message">Selecciona un archivo .shw para comenzar</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menú contextual -->
+    <div id="contextMenu" class="context-menu">
+        <div class="context-menu-item" onclick="selectAllRows(); updateSelectionStatus(); hideContextMenu();">
+            <span>📋</span> <span data-i18n="context_menu.select_all">Seleccionar todo</span>
+        </div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item danger" id="deleteSelectedMenuItem" onclick="deleteSelected(); hideContextMenu();">
+            <span>🗑️</span> <span data-i18n="context_menu.delete_selected">Eliminar seleccionadas</span>
+        </div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" onclick="clearAllSelections(); updateSelectionStatus(); hideContextMenu();">
+            <span>✖️</span> <span data-i18n="context_menu.deselect_all">Limpiar selección</span>
+        </div>
+    </div>
+
+    <script>
+        // SISTEMA DE MULTILENGUAJE SIMPLIFICADO
+        let currentLanguage = 'es';
+        let translations = {};
+        let availableLanguages = [
+            { code: 'es', name: 'Español', nativeName: 'Español', flag: '🇪🇸' },
+            { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸' },
+            { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
+            { code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪' },
+            { code: 'it', name: 'Italian', nativeName: 'Italiano', flag: '🇮🇹' },
+            { code: 'pt', name: 'Portuguese', nativeName: 'Português', flag: '🇵🇹' },
+            { code: 'ca', name: 'Catalan', nativeName: 'Català', flag: '🏴' },
+            { code: 'gl', name: 'Galician', nativeName: 'Galego', flag: '🏴' },
+            { code: 'eu', name: 'Basque', nativeName: 'Euskera', flag: '🏴' }
+        ];
+
+        // Traducciones básicas por si falla la API
+        const fallbackTranslations = {
+            es: {
+                'file_info.devices': 'Dispositivos',
+                'file_info.channels': 'Canales',
+                'export_button': 'Exportar a Excel',
+                'clear_button': 'Limpiar datos',
+                'delete_selected_button': 'Eliminar Seleccionados',
+                'upload_button': 'Seleccionar archivo SHW',
+                'table_headers.channel': 'Nombre del Canal',
+                'table_headers.frequency': 'Frecuencia',
+                'table_headers.rf_zone': 'RF Zone',
+                'table_headers.device_model': 'Dispositivo / Modelo',
+                'table_headers.band': 'Banda',
+                'messages.language_changed': 'Idioma cambiado a {language}',
+                'messages.ascending': 'ascendente',
+                'messages.descending': 'descendente',
+                'ui.no_data_loaded': 'No hay datos cargados',
+                'ui.select_file_message': 'Selecciona un archivo .shw para comenzar',
+                'ui.empty_state_icon': '📄',
+                'ui.click_to_open_file': 'Haz clic aquí para abrir un archivo',
+                'export.csv': 'Exportar CSV',
+                'export.excel': 'Exportar Excel',
+                'export.word': 'Exportar Word',
+                'export.pdf': 'Exportar PDF',
+                'export.export_success': 'Archivo exportado correctamente',
+                'export.export_error': 'Error al exportar archivo'
+            },
+            en: {
+                'file_info.devices': 'Devices',
+                'file_info.channels': 'Channels',
+                'export_button': 'Export to Excel',
+                'clear_button': 'Clear data',
+                'delete_selected_button': 'Delete Selected',
+                'upload_button': 'Select SHW file',
+                'table_headers.channel': 'Channel Name',
+                'table_headers.frequency': 'Frequency',
+                'table_headers.rf_zone': 'RF Zone',
+                'table_headers.device_model': 'Device / Model',
+                'table_headers.band': 'Band',
+                'messages.language_changed': 'Language changed to {language}',
+                'messages.ascending': 'ascending',
+                'messages.descending': 'descending',
+                'ui.no_data_loaded': 'No data loaded',
+                'ui.select_file_message': 'Select a .shw file to begin',
+                'ui.empty_state_icon': '📄',
+                'ui.click_to_open_file': 'Click here to open a file',
+                'export.csv': 'Export CSV',
+                'export.excel': 'Export Excel',
+                'export.word': 'Export Word',
+                'export.pdf': 'Export PDF',
+                'export.export_success': 'File exported successfully',
+                'export.export_error': 'Error exporting file'
+            }
+        };
+
+        async function loadTranslations(lang) {
+            try {
+                console.log(`🔄 Cargando traducciones para: ${lang}`);
+                const response = await fetch(`/api/translations/${lang}`);
+                if (response.ok) {
+                    translations = await response.json();
+                    console.log(`✅ Traducciones cargadas para: ${lang}`, translations);
+                } else {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+            } catch (error) {
+                console.error(`❌ Error cargando traducciones para ${lang}:`, error);
+                // Usar traducciones de fallback
+                translations = fallbackTranslations[lang] || fallbackTranslations['es'] || {};
+            }
+        }
+
+        function populateLanguageSelector() {
+            // Función mantenida para compatibilidad pero el selector ya no existe en el frontend
+            // El cambio de idioma ahora se maneja exclusivamente desde el menú de Electron
+            console.log('ℹ️ Selector de idioma removido del frontend - usando menú de Electron');
+        }
+
+        function getTranslation(key, placeholders = {}) {
+            const keys = key.split('.');
+            let translation = translations;
+            
+            for (const k of keys) {
+                if (translation && typeof translation === 'object' && k in translation) {
+                    translation = translation[k];
+                } else {
+                    // Si no se encuentra, devolver texto en español como fallback
+                    const fallback = fallbackTranslations['es'];
+                    let fallbackTranslation = fallback;
+                    for (const fk of keys) {
+                        if (fallbackTranslation && typeof fallbackTranslation === 'object' && fk in fallbackTranslation) {
+                            fallbackTranslation = fallbackTranslation[fk];
+                        } else {
+                            return key; // Último recurso: devolver la clave
+                        }
+                    }
+                    return fallbackTranslation;
+                }
+            }
+            
+            if (typeof translation === 'string') {
+                // Reemplazar placeholders si existen
+                return translation.replace(/\{(\w+)\}/g, (match, placeholder) => {
+                    return placeholders[placeholder] || match;
+                });
+            }
+            
+            return key;
+        }
+
+        function applyTranslations() {
+            console.log(`🔄 Aplicando traducciones para: ${currentLanguage}`);
+            
+            // Aplicar traducciones a elementos con data-i18n
+            const elements = document.querySelectorAll('[data-i18n]');
+            console.log(`🔍 Encontrados ${elements.length} elementos para traducir`);
+            
+            elements.forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                const translation = getTranslation(key);
+                
+                if (translation && translation !== key) {
+                    element.textContent = translation;
+                    console.log(`✅ Traducido "${key}" -> "${translation}"`);
+                } else {
+                    console.warn(`⚠️ No se encontró traducción para: ${key}`);
+                }
+            });
+            
+            // Actualizar título de la página
+            document.title = 'SHW Reader';
+            
+            // Actualizar idioma del HTML
+            document.documentElement.setAttribute('lang', currentLanguage);
+            
+            // Si el estado vacío está visible, actualizarlo con las nuevas traducciones
+            const emptyStateElements = document.querySelectorAll('.empty-state');
+            if (emptyStateElements.length > 0 && tableData.length === 0) {
+                console.log('🔄 Actualizando estado vacío con nuevas traducciones');
+                showEmptyState();
+            }
+            
+            console.log(`✅ Traducciones aplicadas para idioma: ${currentLanguage}`);
+        }
+
+        // Función auxiliar para obtener el nombre nativo del idioma
+        function getLanguageName(langCode) {
+            const languageNames = {
+                'es': 'Español',
+                'en': 'English',
+                'fr': 'Français',
+                'de': 'Deutsch',
+                'it': 'Italiano',
+                'pt': 'Português',
+                'ca': 'Català',
+                'gl': 'Galego',
+                'eu': 'Euskera'
+            };
+            return languageNames[langCode] || langCode;
+        }
+
+        async function changeLanguage(newLang) {
+            if (newLang === currentLanguage) {
+                console.log(`ℹ️ Ya está en idioma: ${newLang}`);
+                return;
+            }
+            
+            console.log(`🔄 Cambiando idioma de ${currentLanguage} a ${newLang}`);
+            
+            currentLanguage = newLang;
+            localStorage.setItem('app-language', newLang);
+            
+            // Cargar nuevas traducciones
+            await loadTranslations(newLang);
+            
+            // Aplicar traducciones (esto también actualizará el estado vacío si es necesario)
+            applyTranslations();
+            
+            // Mostrar mensaje de confirmación usando el sistema de traducciones
+            const languageName = getLanguageName(newLang);
+            const message = getTranslation('messages.language_changed', { language: languageName });
+            showStatus(message, 'info');
+            
+            console.log(`✅ Idioma cambiado a: ${newLang}`);
+        }
+
+        // Inicializar sistema de idiomas
+        async function initializeLanguageSystem() {
+            console.log('🌐 Inicializando sistema de idiomas...');
+            
+            // Obtener idioma guardado
+            currentLanguage = localStorage.getItem('app-language') || 'es';
+            console.log(`🔍 Idioma guardado: ${currentLanguage}`);
+            
+            // Poblar selector
+            populateLanguageSelector();
+            
+            // Cargar traducciones
+            await loadTranslations(currentLanguage);
+            
+            // Aplicar traducciones
+            applyTranslations();
+            
+            console.log('✅ Sistema de idiomas inicializado');
+        }
+
+        let tableData = [];
+        let editingCell = null;
+        let lastSelectedRow = null; // Para selección con Shift
+        
+        // Variables para ordenamiento
+        let currentSortColumn = null;
+        let currentSortDirection = 'asc'; // 'asc' o 'desc'
+
+
+        // SISTEMA DE PERSISTENCIA MEJORADO - SIN necesidad de localStorage para temas
+        function saveDataToStorage() {
+            if (tableData && tableData.length > 0) {
+                const dataToSave = {
+                    tableData: tableData,
+                    deviceCount: document.getElementById('deviceCount').textContent,
+                    channelCount: document.getElementById('channelCount').textContent,
+                    currentSortColumn: currentSortColumn,
+                    currentSortDirection: currentSortDirection,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem('shw_data', JSON.stringify(dataToSave));
+                console.log('💾 Datos guardados en localStorage para persistencia');
+            }
+        }
+
+        function restoreDataFromStorage() {
+            const savedData = localStorage.getItem('shw_data');
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    // Solo restaurar si los datos son relativamente recientes (menos de 1 hora)
+                    if (Date.now() - data.timestamp < 3600000) {
+                        tableData = data.tableData;
+                        currentSortColumn = data.currentSortColumn || null;
+                        currentSortDirection = data.currentSortDirection || 'asc';
+                        renderTable();
+                        updateStats(parseInt(data.deviceCount), parseInt(data.channelCount));
+                        console.log('🔄 Datos restaurados desde localStorage');
+                        // Ajustar padding después de restaurar datos
+                        adjustAfterDataLoad();
+                        return true;
+                    }
+                } catch (error) {
+                    console.error('Error al restaurar datos:', error);
+                }
+            }
+            return false;
+        }
+
+        function clearStoredData() {
+            localStorage.removeItem('shw_data');
+        }
+
+        // FUNCIÓN DE ORDENAMIENTO
+        function sortTable(column) {
+            if (tableData.length === 0) return;
+            
+            // Si ya estamos ordenando por esta columna, cambiar dirección
+            if (currentSortColumn === column) {
+                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                // Nueva columna, empezar con ascendente
+                currentSortColumn = column;
+                currentSortDirection = 'asc';
+            }
+            
+            // Limpiar selecciones antes de ordenar
+            clearAllSelections();
+            
+            // Ordenar los datos
+            tableData.sort((a, b) => {
+                let aVal = a[column];
+                let bVal = b[column];
+                
+                // Manejo especial para frecuencias (convertir a número)
+                if (column === 'frequency') {
+                    // Convertir frecuencias a números para comparación numérica
+                    aVal = aVal === 'N/A' ? -1 : parseFloat(aVal);
+                    bVal = bVal === 'N/A' ? -1 : parseFloat(bVal);
+                } else {
+                    // Para otros campos, comparación alfabética (case-insensitive)
+                    aVal = (aVal || '').toString().toLowerCase();
+                    bVal = (bVal || '').toString().toLowerCase();
+                }
+                
+                let comparison = 0;
+                if (aVal < bVal) comparison = -1;
+                else if (aVal > bVal) comparison = 1;
+                
+                return currentSortDirection === 'asc' ? comparison : -comparison;
+            });
+            
+            // Actualizar indicadores visuales en la cabecera
+            updateSortIndicators();
+            
+            // Re-renderizar tabla con datos ordenados
+            renderTable();
+            
+            // Guardar datos ordenados
+            saveDataToStorage();
+            
+            showStatus(`${getTranslation('messages.table_sorted', { 
+                column: getColumnDisplayName(column), 
+                direction: getTranslation(`messages.${currentSortDirection}`) 
+            })}`, 'info');
+        }
+
+        function updateSortIndicators() {
+            // Limpiar todos los indicadores
+            const allHeaders = document.querySelectorAll('.th-cell.sortable');
+            allHeaders.forEach(header => {
+                header.classList.remove('sorted-asc', 'sorted-desc');
+            });
+            
+            // Agregar indicador a la columna actual
+            if (currentSortColumn) {
+                const currentHeader = document.querySelector(`.th-cell[data-sort="${currentSortColumn}"]`);
+                if (currentHeader) {
+                    currentHeader.classList.add(currentSortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
+                }
+            }
+        }
+
+        function getColumnDisplayName(column) {
+            const columnNames = {
+                'channel': 'Nombre del Canal',
+                'frequency': 'Frecuencia',
+                'device': 'Dispositivo',
+                'zone': 'RF Zone',
+                'band': 'Banda'
+            };
+            return columnNames[column] || column;
+        }
+
+        // Función para mostrar estado vacío inicial
+        function showEmptyState() {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="empty-state clickable-empty-state" onclick="openFileDialog()">
+                        <div class="empty-state-icon">${getTranslation('ui.empty_state_icon')}</div>
+                        <h3>${getTranslation('ui.no_data_loaded')}</h3>
+                        <p>${getTranslation('ui.select_file_message')}</p>
+                        <div class="empty-state-hint">${getTranslation('ui.click_to_open_file')}</div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Función para abrir el diálogo de archivos
+        function openFileDialog() {
+            console.log('🗂️ Solicitando apertura de diálogo de archivos');
+            
+            // Verificar si estamos en Electron
+            if (window.electronAPI && window.electronAPI.abrirDialogoArchivo) {
+                // En Electron, usar la API nativa
+                window.electronAPI.abrirDialogoArchivo();
+            } else {
+                // En navegador web, usar el input de archivo tradicional
+                console.log('Ejecutándose en navegador web, usando input de archivo');
+                const fileInput = document.getElementById('fileInput');
+                if (fileInput) {
+                    fileInput.click();
+                } else {
+                    console.warn('No se encontró el input de archivo');
+                }
+            }
+        }
+
+        // Variables para renderizado optimizado - PRIORIDAD: funcionalidad completa
+        const RENDER_ALL_THRESHOLD = 1000; // Solo virtualizar si hay MÁS de 1000 filas
+        const BATCH_SIZE = 100; // Filas por lote durante la carga inicial
+        const ROW_HEIGHT = 58;
+        
+        let renderingState = {
+            isRendering: false,
+            currentBatch: 0,
+            totalBatches: 0,
+            useVirtualization: false
+        };
+
+        // Función para actualizar el título de la página según el tema
+        function updatePageTitle() {
+            const currentTheme = getCurrentTheme();
+            const titleSuffix = currentTheme === 'dark' ? ' - Modo Oscuro' : ' - Modo Claro';
+            document.title = 'SHW Reader' + titleSuffix;
+        }
+
+        // SISTEMA DE CAMBIO DE TEMA DINÁMICO
+        function getCurrentTheme() {
+            return localStorage.getItem('app-theme') || 'dark'; // Tema oscuro por defecto
+        }
+
+        function setTheme(theme) {
+            localStorage.setItem('app-theme', theme);
+            document.documentElement.setAttribute('data-theme', theme);
+            updatePageTitle(); // Actualizar título al cambiar tema
+            console.log(`🎨 Tema cambiado a: ${theme}`);
+        }
+
+        // Función para cambiar tema (llamada desde Electron menu) - NUEVA IMPLEMENTACIÓN
+        function changeTheme(theme) {
+            console.log(`🔄 Cambiando tema a: ${theme}`);
+            setTheme(theme);
+            // NO redireccionar - solo cambiar CSS
+            // Los datos se mantienen automáticamente porque NO recargamos la página
+        }
+
+        // Aplicar tema al cargar la página
+        function applyStoredTheme() {
+            const storedTheme = getCurrentTheme();
+            setTheme(storedTheme);
+            updatePageTitle(); // Asegurar que el título esté correcto
+            console.log(`🎨 Tema aplicado al inicio: ${storedTheme}`);
+        }
+
+        // File input handling
+        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Delete/Backspace: Eliminar filas seleccionadas
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                if (!editingCell) { // Solo si no estamos editando una celda
+                    deleteSelected();
+                    e.preventDefault();
+                }
+            }
+            
+            // Cmd+A / Ctrl+A: Seleccionar todo
+            if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
+                if (!editingCell) { // Solo si no estamos editando una celda
+                    selectAllRows();
+                    updateSelectionStatus();
+                    e.preventDefault();
+                }
+            }
+            
+            // Escape: Limpiar selección o cerrar menú contextual
+            if (e.key === 'Escape' && !editingCell) {
+                const contextMenu = document.getElementById('contextMenu');
+                if (contextMenu.style.display === 'block') {
+                    hideContextMenu();
+                } else {
+                    clearAllSelections();
+                    updateSelectionStatus();
+                }
+                e.preventDefault();
+            }
+        });
+
+        // Drag and drop
+        document.body.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            document.body.classList.add('drag-over');
+        });
+
+        document.body.addEventListener('dragleave', (e) => {
+            if (!document.body.contains(e.relatedTarget)) {
+                document.body.classList.remove('drag-over');
+            }
+        });
+
+        document.body.addEventListener('drop', (e) => {
+            e.preventDefault();
+            document.body.classList.remove('drag-over');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].name.toLowerCase().endsWith('.shw')) {
+                uploadFile(files[0]);
+            } else {
+                showStatus(getTranslation('messages.invalid_file'), 'error');
+            }
+        });
+
+        // Function to load file from path (called by Electron)
+        function loadFileFromPath(filePath) {
+            showLoading(true);
+            
+            fetch('/load_file_path', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ file_path: filePath })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    tableData = data.data;
+                    renderTable();
+                    updateStats(data.devices, data.rows);
+                    saveDataToStorage(); // Guardar automáticamente para persistencia
+                    showStatus(getTranslation('messages.file_success', { 
+                        filename: data.filename, 
+                        devices: data.devices, 
+                        rows: data.rows 
+                    }), 'success');
+                    // Ajustar padding del container después de cargar datos
+                    adjustAfterDataLoad();
+                } else {
+                    showStatus(`❌ ${getTranslation('messages.file_error')}: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showStatus(getTranslation('messages.file_error_processing'), 'error');
+            })
+            .finally(() => {
+                showLoading(false);
+            });
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                uploadFile(file);
+            }
+        }
+
+        function uploadFile(file) {
+            showLoading(true);
+            showStatus(getTranslation('messages.processing'), 'info');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                showLoading(false);
+                if (data.success) {
+                    tableData = data.data;
+                    renderTable();
+                    updateStats(data.devices, data.rows);
+                    showStatus(getTranslation('messages.file_processed', { 
+                        devices: data.devices, 
+                        rows: data.rows 
+                    }), 'success');
+                } else {
+                    showStatus(data.error || 'Error al procesar el archivo', 'error');
+                }
+            })
+            .catch(error => {
+                showLoading(false);
+                showStatus(getTranslation('messages.connection_error'), 'error');
+                console.error('Error:', error);
+            });
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            
+            if (tableData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <div class="empty-state-icon">${getTranslation('ui.empty_state_icon')}</div>
+                            <h3>${getTranslation('ui.no_data_loaded')}</h3>
+                            <p>${getTranslation('ui.select_file_message')}</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // NUEVA ESTRATEGIA: Renderizar TODAS las filas para archivos normales
+            // Solo virtualizar para casos extremadamente grandes
+            if (tableData.length <= RENDER_ALL_THRESHOLD) {
+                console.log(`📊 Archivo normal (${tableData.length} filas) - Renderizando todas las filas sin restricciones`);
+                renderAllRowsComplete();
+            } else {
+                console.log(`⚠️ Archivo extremadamente grande (${tableData.length} filas) - Activando virtualización básica`);
+                renderAllRowsComplete(); // Por ahora, incluso archivos grandes se renderizan completos
+            }
+        }
+
+        function renderAllRowsComplete() {
+            const tbody = document.getElementById('tableBody');
+            renderingState.isRendering = true;
+            renderingState.totalBatches = Math.ceil(tableData.length / BATCH_SIZE);
+            renderingState.currentBatch = 0;
+            renderingState.useVirtualization = false;
+            
+            console.log(`🚀 Iniciando renderizado completo: ${tableData.length} filas en ${renderingState.totalBatches} lotes de ${BATCH_SIZE}`);
+            
+            // Limpiar contenido existente
+            tbody.innerHTML = '';
+            
+            // Renderizar en lotes para evitar bloquear la UI
+            renderNextBatch();
+        }
+
+        function renderNextBatch() {
+            const tbody = document.getElementById('tableBody');
+            const startIndex = renderingState.currentBatch * BATCH_SIZE;
+            const endIndex = Math.min(startIndex + BATCH_SIZE, tableData.length);
+            
+            console.log(`📦 Lote ${renderingState.currentBatch + 1}/${renderingState.totalBatches}: filas ${startIndex}-${endIndex-1}`);
+            
+            const fragment = document.createDocumentFragment();
+            
+            for (let i = startIndex; i < endIndex; i++) {
+                const row = tableData[i];
+                const tr = document.createElement('tr');
+                tr.setAttribute('data-id', row.id);
+                tr.setAttribute('data-index', i.toString());
+                tr.onclick = (event) => handleRowClick(event, row.id, i);
+                tr.oncontextmenu = (event) => showContextMenu(event, row.id, i);
+                
+                tr.innerHTML = `
+                    <td class="editable" data-field="channel" onclick="editCell(this); event.stopPropagation();">${row.channel}</td>
+                    <td class="editable" data-field="frequency" onclick="editCell(this); event.stopPropagation();">
+                        ${row.frequency !== 'N/A' ? row.frequency + '<span class="frequency-unit">MHz</span>' : 'N/A'}
+                    </td>
+                    <td>${row.zone}</td>
+                    <td class="${row.device ? 'device-name' : ''}">${row.device}</td>
+                    <td>${row.band}</td>
+                `;
+                
+                fragment.appendChild(tr);
+            }
+            
+            tbody.appendChild(fragment);
+            renderingState.currentBatch++;
+            
+            // Continuar con el siguiente lote si hay más filas
+            if (renderingState.currentBatch < renderingState.totalBatches) {
+                // Usar requestAnimationFrame para no bloquear la UI
+                requestAnimationFrame(renderNextBatch);
+            } else {
+                renderingState.isRendering = false;
+                console.log(`✅ RENDERIZADO COMPLETO: ${tableData.length} filas cargadas y disponibles para búsqueda/selección`);
+                console.log(`🎯 Usuario puede ahora buscar, seleccionar y scrollear por TODAS las filas sin limitaciones`);
+                
+                // Sincronizar anchos de columnas después de renderizar
+                setTimeout(syncColumnWidths, 100);
+                
+                // Actualizar indicadores de ordenamiento después de renderizar
+                setTimeout(updateSortIndicators, 150);
+            }
+        }
+
+        // Funciones simplificadas - scroll nativo sin virtualización
+        function setupOptimizedScroll() {
+            // Scroll nativo del navegador - sin optimizaciones especiales
+            console.log(`📱 Scroll nativo activado - todas las filas disponibles`);
+        }
+
+        function handleOptimizedScroll(e) {
+            // Sin manejo especial de scroll
+        }
+
+        function cleanupUnusedElements() {
+            // Sin limpieza agresiva - dejamos que el navegador maneje la memoria
+        }
+
+        function editCell(cell) {
+            if (editingCell) return; // Prevent multiple edits
+
+            editingCell = cell;
+            const currentValue = cell.dataset.field === 'frequency' 
+                ? cell.textContent.replace('MHz', '').trim()
+                : cell.textContent;
+            
+            cell.classList.add('editing');
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = currentValue === 'N/A' ? '' : currentValue;
+            input.className = 'edit-input';
+            
+            cell.innerHTML = '';
+            cell.appendChild(input);
+            input.focus();
+            input.select();
+
+            function saveEdit() {
+                const newValue = input.value.trim() || 'N/A';
+                const rowId = cell.closest('tr').dataset.id;
+                const field = cell.dataset.field;
+                
+                // Update data
+                const rowIndex = tableData.findIndex(row => row.id === rowId);
+                if (rowIndex !== -1) {
+                    tableData[rowIndex][field] = newValue;
+                }
+                
+                // Update display
+                const displayValue = field === 'frequency' && newValue !== 'N/A' 
+                    ? newValue + '<span class="frequency-unit">MHz</span>'
+                    : newValue;
+                
+                cell.innerHTML = displayValue;
+                cell.classList.remove('editing');
+                editingCell = null;
+                
+                showStatus(getTranslation('messages.field_updated'), 'success');
+                
+                // Send update to server
+                updateRow(rowId, field, newValue);
+            }
+
+            function cancelEdit() {
+                cell.classList.remove('editing');
+                renderTable();
+                editingCell = null;
+            }
+
+            input.addEventListener('blur', saveEdit);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    saveEdit();
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    cancelEdit();
+                }
+            });
+        }
+
+        function updateRow(rowId, field, value) {
+            fetch('/update_row', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: rowId,
+                    field: field,
+                    value: value
+                })
+            })
+            .catch(error => {
+                console.error('Error updating row:', error);
+            });
+        }
+
+        // Funciones para el dropdown de exportación
+        function toggleExportDropdown() {
+            const dropdown = document.querySelector('.export-dropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Cerrar dropdown si se hace clic fuera
+        document.addEventListener('click', function(event) {
+            const dropdown = document.querySelector('.export-dropdown');
+            if (dropdown && !dropdown.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        function exportData(format) {
+            // Cerrar dropdown
+            document.querySelector('.export-dropdown').classList.remove('show');
+            
+            if (tableData.length === 0) {
+                showStatus(getTranslation('messages.no_data'), 'error');
+                return;
+            }
+
+            const endpoint = `/export_${format}`;
+            
+            fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    rows: tableData,
+                    language: currentLanguage
+                })
+            })
+            .then(response => {
+                if (format === 'csv') {
+                    return response.json();
+                } else {
+                    // Para Excel, Word y PDF, descargar directamente
+                    if (response.ok) {
+                        return response.blob().then(blob => {
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            
+                            // Obtener filename del header Content-Disposition si está disponible
+                            const contentDisposition = response.headers.get('Content-Disposition');
+                            let filename = `shw_data_export.${format}`;
+                            if (contentDisposition) {
+                                const filenameMatch = contentDisposition.match(/filename="([^"]+)"/);
+                                if (filenameMatch) {
+                                    filename = filenameMatch[1];
+                                }
+                            }
+                            
+                            a.download = filename;
+                            document.body.appendChild(a);
+                            a.click();
+                            window.URL.revokeObjectURL(url);
+                            document.body.removeChild(a);
+                            
+                            showStatus(getTranslation('export.export_success'), 'success');
+                        });
+                    } else {
+                        return response.json().then(data => {
+                            throw new Error(data.error || 'Error de exportación');
+                        });
+                    }
+                }
+            })
+            .then((data) => {
+                if (format === 'csv' && data) {
+                    if (data.success) {
+                        downloadCSV(data.csv_data, data.filename);
+                        showStatus(getTranslation('export.export_success'), 'success');
+                    } else {
+                        showStatus(data.error || getTranslation('export.export_error'), 'error');
+                    }
+                }
+            })
+            .catch(error => {
+                showStatus(getTranslation('export.export_error') + ': ' + error.message, 'error');
+                console.error('Error:', error);
+            });
+        }
+
+        // Función legacy para compatibilidad
+        function exportCSV() {
+            exportData('csv');
+        }
+
+        function downloadCSV(csvData, filename) {
+            const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function clearTable() {
+            tableData = [];
+            lastSelectedRow = null;
+            currentSortColumn = null;
+            currentSortDirection = 'asc';
+            renderTable();
+            updateStats(0, 0);
+            showStatus(getTranslation('messages.data_cleared'), 'info');
+            document.getElementById('fileInput').value = '';
+            clearStoredData(); // Limpiar también el localStorage
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type} show`;
+            
+            setTimeout(() => {
+                status.classList.remove('show');
+            }, 4000);
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').classList.toggle('show', show);
+        }
+
+        function updateStats(devices, channels) {
+            document.getElementById('deviceCount').textContent = devices;
+            document.getElementById('channelCount').textContent = channels;
+            // Stats siempre visibles - sin condicional de display
+        }
+
+
+
+
+
+
+
+
+
+
+
+        function handleRowClick(event, rowId, rowIndex) {
+            // Si estamos editando una celda, permitir la edición
+            if (event.target.classList.contains('editable')) {
+                return; // Permitir edición normal
+            }
+            
+            const row = event.currentTarget;
+            const isShiftClick = event.shiftKey;
+            const isCmdClick = event.metaKey || event.ctrlKey;
+            
+            event.preventDefault(); // Prevenir selección de texto por defecto
+            
+            if (isShiftClick && lastSelectedRow !== null) {
+                // Shift+Click: Seleccionar rango
+                selectRange(lastSelectedRow, rowIndex);
+            } else if (isCmdClick) {
+                // Cmd+Click o Ctrl+Click: Alternar selección de esta fila
+                toggleRowSelection(row, rowId);
+                lastSelectedRow = rowIndex;
+            } else {
+                // Click normal: Limpiar selección y seleccionar solo esta fila
+                clearAllSelections();
+                selectRow(row, rowId);
+                lastSelectedRow = rowIndex;
+            }
+            
+            updateSelectionStatus();
+        }
+
+        function selectRow(row, rowId) {
+            row.classList.add('selected');
+            row.dataset.selected = 'true';
+        }
+
+        function deselectRow(row, rowId) {
+            row.classList.remove('selected');
+            row.removeAttribute('data-selected');
+        }
+
+        function toggleRowSelection(row, rowId) {
+            if (row.classList.contains('selected')) {
+                deselectRow(row, rowId);
+            } else {
+                selectRow(row, rowId);
+            }
+        }
+
+        function selectRange(startIndex, endIndex) {
+            const start = Math.min(startIndex, endIndex);
+            const end = Math.max(startIndex, endIndex);
+            
+            // Limpiar selección actual
+            clearAllSelections();
+            
+            // Seleccionar rango
+            const rows = document.querySelectorAll('tbody tr[data-index]');
+            for (let i = start; i <= end && i < rows.length; i++) {
+                const row = rows[i];
+                const rowId = row.dataset.id;
+                if (row && rowId) {
+                    selectRow(row, rowId);
+                }
+            }
+        }
+
+        function clearAllSelections() {
+            const selectedRows = document.querySelectorAll('tbody tr.selected');
+            selectedRows.forEach(row => {
+                deselectRow(row, row.dataset.id);
+            });
+        }
+
+        function selectAllRows() {
+            const rows = document.querySelectorAll('tbody tr[data-id]');
+            rows.forEach(row => {
+                selectRow(row, row.dataset.id);
+            });
+        }
+
+        function updateSelectionStatus() {
+            const selectedRows = document.querySelectorAll('tbody tr.selected').length;
+            
+            if (selectedRows > 0) {
+                showStatus(getTranslation('messages.rows_selected', { count: selectedRows }), 'info');
+            } else {
+                // Limpiar mensaje de estado si no hay selección
+                const statusElement = document.getElementById('status');
+                if (statusElement.textContent.includes('seleccionada') || statusElement.textContent.includes('selected')) {
+                    statusElement.textContent = '';
+                    statusElement.className = 'status';
+                }
+            }
+        }
+
+        function deleteSelected() {
+            const selectedRows = document.querySelectorAll('tbody tr.selected');
+            
+            if (selectedRows.length === 0) {
+                showStatus(getTranslation('messages.no_selection'), 'error');
+                return;
+            }
+            
+            const confirmMessage = getTranslation('messages.confirm_delete', { count: selectedRows.length }) || 
+                                 `¿Estás seguro de que quieres eliminar ${selectedRows.length} fila(s) seleccionada(s)?`;
+            
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+            
+            // Obtener IDs de las filas seleccionadas
+            const selectedIds = Array.from(selectedRows).map(row => row.dataset.id);
+            
+            // Eliminar de tableData
+            tableData = tableData.filter(row => !selectedIds.includes(row.id));
+            
+            // Re-aplicar ordenamiento si hay uno activo
+            if (currentSortColumn) {
+                sortTable(currentSortColumn);
+            } else {
+                // Re-renderizar tabla
+                renderTable();
+            }
+            
+            // Actualizar estadísticas
+            const deviceCount = new Set(tableData.filter(row => row.device).map(row => row.device)).size;
+            updateStats(deviceCount, tableData.length);
+            
+            showStatus(getTranslation('messages.rows_deleted', { count: selectedRows.length }), 'success');
+            
+            // Guardar cambios
+            saveDataToStorage();
+            
+            // Resetear última fila seleccionada
+            lastSelectedRow = null;
+        }
+
+        // Función para eliminar todas las filas con dispositivo N/A
+        // Esta función está disponible para ser llamada desde el menú principal de Electron
+        function deleteAllNA() {
+            // Contar cuántas filas tienen exactamente "N/A" como nombre del canal
+            const naRows = tableData.filter(row => row.channel === 'N/A');
+            
+            if (naRows.length === 0) {
+                showStatus(getTranslation('messages.no_na_channels'), 'info');
+                return;
+            }
+            
+            if (!confirm(`¿Estás seguro de que quieres eliminar ${naRows.length} fila(s) con nombre de canal "N/A"?`)) {
+                return;
+            }
+            
+            // Eliminar solo las filas donde el nombre del canal sea exactamente "N/A"
+            const originalCount = tableData.length;
+            tableData = tableData.filter(row => row.channel !== 'N/A');
+            const deletedCount = originalCount - tableData.length;
+            
+            // Re-aplicar ordenamiento si hay uno activo
+            if (currentSortColumn) {
+                sortTable(currentSortColumn);
+            } else {
+                // Re-renderizar tabla
+                renderTable();
+            }
+            
+            // Actualizar estadísticas
+            const deviceCount = new Set(tableData.filter(row => row.device).map(row => row.device)).size;
+            updateStats(deviceCount, tableData.length);
+            
+            // Limpiar selecciones
+            clearAllSelections();
+            updateSelectionStatus();
+            
+            showStatus(`${deletedCount} fila(s) con nombre de canal "N/A" eliminadas`, 'success');
+            
+            // Guardar cambios
+            saveDataToStorage();
+        }
+
+        // Funciones para el menú contextual
+        function showContextMenu(event, rowId, rowIndex) {
+            event.preventDefault();
+            
+            const contextMenu = document.getElementById('contextMenu');
+            const deleteMenuItem = document.getElementById('deleteSelectedMenuItem');
+            
+            // Si la fila no está seleccionada, seleccionarla primero
+            const row = event.currentTarget;
+            if (!row.classList.contains('selected')) {
+                clearAllSelections();
+                selectRow(row, rowId);
+                lastSelectedRow = rowIndex;
+                updateSelectionStatus();
+            }
+            
+            const selectedCount = document.querySelectorAll('tbody tr.selected').length;
+            
+            // Actualizar el texto del menú según cuántas filas están seleccionadas
+            if (selectedCount === 1) {
+                deleteMenuItem.innerHTML = '<span>🗑️</span> Eliminar fila seleccionada';
+            } else {
+                deleteMenuItem.innerHTML = `<span>🗑️</span> Eliminar ${selectedCount} filas seleccionadas`;
+            }
+            
+            // Habilitar/deshabilitar opciones según el contexto
+            deleteMenuItem.classList.toggle('disabled', selectedCount === 0);
+            
+            // Posicionar el menú
+            const x = event.pageX;
+            const y = event.pageY;
+            const menuWidth = 200; // Reducido de 220px
+            const menuHeight = 120; // Reducido de 150px
+            
+            // Ajustar posición si el menú se sale de la pantalla
+            let menuX = x;
+            let menuY = y;
+            
+            if (x + menuWidth > window.innerWidth) {
+                menuX = x - menuWidth;
+            }
+            
+            if (y + menuHeight > window.innerHeight) {
+                menuY = y - menuHeight;
+            }
+            
+            contextMenu.style.left = menuX + 'px';
+            contextMenu.style.top = menuY + 'px';
+            contextMenu.style.display = 'block';
+            
+            // Agregar evento para cerrar el menú al hacer clic fuera
+            setTimeout(() => {
+                document.addEventListener('click', hideContextMenuOnClickOutside);
+            }, 0);
+        }
+
+        function hideContextMenu() {
+            const contextMenu = document.getElementById('contextMenu');
+            contextMenu.style.display = 'none';
+            document.removeEventListener('click', hideContextMenuOnClickOutside);
+        }
+
+        function hideContextMenuOnClickOutside(event) {
+            const contextMenu = document.getElementById('contextMenu');
+            if (!contextMenu.contains(event.target)) {
+                hideContextMenu();
+            }
+        }
+
+
+    </script>
+    <script>
+    // Listener seguro usando preload.js
+    console.log('Script de listener cargado');
+    setTimeout(() => {
+        if (window.electronAPI) {
+            window.electronAPI.onAbrirArchivoSHW((filePath) => {
+                console.log('Archivo recibido en frontend:', filePath);
+                // Llamar a la función real de carga
+                loadFileFromPath(filePath);
+            });
+        } else {
+            console.log('window.electronAPI no está disponible - modo navegador');
+        }
+    }, 100);
+    </script>
+    <script>
+        // Función para ajustar dinámicamente el padding del container
+        function adjustContainerPadding() {
+            const header = document.querySelector('.header');
+            const container = document.querySelector('.container');
+            
+            if (header && container) {
+                const headerHeight = header.offsetHeight;
+                const safetyMargin = 20; // Margen de seguridad adicional
+                const totalPadding = headerHeight + safetyMargin;
+                
+                container.style.paddingTop = totalPadding + 'px';
+                console.log(`🔧 Header height: ${headerHeight}px, Container padding-top ajustado a: ${totalPadding}px`);
+            }
+        }
+
+        // Llamar al ajuste cuando se carga la página
+        document.addEventListener('DOMContentLoaded', adjustContainerPadding);
+        
+        // Llamar al ajuste cuando se redimensiona la ventana
+        window.addEventListener('resize', adjustContainerPadding);
+        
+        // Llamar al ajuste después de cargar datos (por si el header cambia de tamaño)
+        function adjustAfterDataLoad() {
+            setTimeout(adjustContainerPadding, 100);
+        }
+
+        // Función para sincronizar el ancho de las columnas entre cabecera fija y tabla
+        function syncColumnWidths() {
+            const headerCells = document.querySelectorAll('.table-header-content .th-cell');
+            const tableCells = document.querySelector('#dataTable tbody tr:first-child')?.cells;
+            
+            if (tableCells && headerCells.length > 0) {
+                // Solo sincronizar si hay datos en la tabla
+                for (let i = 0; i < Math.min(headerCells.length, tableCells.length); i++) {
+                    const tableWidth = tableCells[i].offsetWidth;
+                    headerCells[i].style.width = tableWidth + 'px';
+                }
+            }
+ }
+        }
+
+        // Llamar a la sincronización cuando se redimensiona la ventana
+        window.addEventListener('resize', syncColumnWidths);
+    </script>
+    <script>
+        // Inicialización cuando se carga la página
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🎯 SHW Reader (Multilenguaje) inicializado');
+            
+            // Aplicar tema guardado ANTES de restaurar datos
+            applyStoredTheme();
+            
+            // Inicializar sistema de idiomas
+            await initializeLanguageSystem();
+            
+            // Intentar restaurar datos
+            const dataRestored = restoreDataFromStorage();
+            
+            if (!dataRestored) {
+                showEmptyState();
+                updateStats(0, 0); // Mostrar stats con valores iniciales
+            }
+        });
+
+        // Exponer funciones al contexto global para Electron
+        window.changeTheme = changeTheme;
+        window.changeLanguage = changeLanguage;
+    </script>
+</body>
+</html>

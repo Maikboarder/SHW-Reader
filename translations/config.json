@@ -1,0 +1,60 @@
+{
+  "languages": [
+    {
+      "code": "es",
+      "name": "Español",
+      "nativeName": "Español",
+      "flag": "🇪🇸"
+    },
+    {
+      "code": "en",
+      "name": "English",
+      "nativeName": "English",
+      "flag": "🇺🇸"
+    },
+    {
+      "code": "fr",
+      "name": "French",
+      "nativeName": "Français",
+      "flag": "🇫🇷"
+    },
+    {
+      "code": "de",
+      "name": "German",
+      "nativeName": "Deutsch",
+      "flag": "🇩🇪"
+    },
+    {
+      "code": "it",
+      "name": "Italian",
+      "nativeName": "Italiano",
+      "flag": "🇮🇹"
+    },
+    {
+      "code": "pt",
+      "name": "Portuguese",
+      "nativeName": "Português",
+      "flag": "🇵🇹"
+    },
+    {
+      "code": "ca",
+      "name": "Catalan",
+      "nativeName": "Català",
+      "flag": "🏴"
+    },
+    {
+      "code": "gl",
+      "name": "Galician",
+      "nativeName": "Galego",
+      "flag": "🏴"
+    },
+    {
+      "code": "eu",
+      "name": "Basque",
+      "nativeName": "Euskera",
+      "flag": "🏴"
+    }
+  ],
+  "defaultLanguage": "es",
+  "fallbackLanguage": "en"
+}
