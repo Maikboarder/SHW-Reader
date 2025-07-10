@@ -7,6 +7,8 @@
   
   *A multi-language Electron application for viewing and exporting Wireless Workbench SHW files*
   
+  **Created by Miguel Fuentes Rodriguez ([@Maikboarder](https://github.com/Maikboarder))**
+  
   [![GitHub release](https://img.shields.io/github/release/Maikboarder/SHW-Reader.svg)](https://github.com/Maikboarder/SHW-Reader/releases)
   [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
   [![macOS](https://img.shields.io/badge/platform-macOS-lightgrey.svg)](https://github.com/Maikboarder/SHW-Reader)
@@ -179,7 +181,17 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
   <strong>SHW Reader v1.0.0</strong><br>
-  Made with ❤️ for the audio professional community
+  Created with ❤️ by <strong>Miguel Fuentes Rodriguez</strong><br>
+  <em>For the audio professional community</em>
   
-  **Created by [Maikboarder](https://github.com/Maikboarder)**
+  <br><br>
+  
+  **👨‍💻 Developer**<br>
+  [Miguel Fuentes Rodriguez](https://github.com/Maikboarder) ([@Maikboarder](https://github.com/Maikboarder))<br>
+  <em>Audio Professional & Software Developer</em>
+  
+  <br>
+  
+  **💖 Support Miguel's Work**<br>
+  [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support%20Miguel-orange?style=flat-square&logo=buy-me-a-coffee)](https://buymeacoffee.com/maikboarder)
 </div>

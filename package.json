@@ -25,7 +25,11 @@
     "frequency",
     "macos"
   ],
-  "author": "SHW Reader Team",
+  "author": {
+    "name": "Miguel Fuentes Rodriguez",
+    "email": "maikboarder@gmail.com",
+    "url": "https://github.com/Maikboarder"
+  },
   "license": "MIT",
   "devDependencies": {
     "electron": "^28.0.0",
