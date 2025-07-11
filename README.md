@@ -76,6 +76,8 @@ SHW Reader is a **free, professional tool** for audio engineers and technicians 
 - **macOS**: macOS 10.14 or later, Python 3.8 or later
 - **Windows**: Windows 10 or later, Python 3.8 or later
 
+**🔧 Having installation issues?** Check our [Troubleshooting Guide](TROUBLESHOOTING.md) for solutions to common Python installation problems.
+
 ### Installation
 
 #### macOS
@@ -90,6 +92,12 @@ SHW Reader is a **free, professional tool** for audio engineers and technicians 
 2. **For Installer**: Run the downloaded `.exe` and follow setup wizard
 3. **For Portable**: Extract and run the `.exe` directly (no installation needed)
 4. **Allow Windows Defender** if it asks (it's safe!)
+
+**⚠️ Important for Windows Users:**
+- If you see "Error installing Python", SHW Reader will run in **Basic Mode** with limited functionality
+- For full features, install Python manually from [python.org](https://python.org/downloads/) 
+- During Python installation, check "Add Python to PATH"
+- See our [Troubleshooting Guide](TROUBLESHOOTING.md) for detailed help
 
 ### Alternative: GitHub Releases
 
