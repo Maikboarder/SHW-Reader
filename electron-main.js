@@ -27,36 +27,102 @@ function getAppName() {
 // Función para verificar si Python está disponible
 function checkPython() {
     return new Promise((resolve) => {
-        const python = spawn('python3', ['--version']);
-        python.on('error', () => {
+        console.log('Verificando disponibilidad de Python...');
+        
+        // Primero intentar con python3
+        const python3 = spawn('python3', ['--version'], { shell: true });
+        python3.on('error', () => {
+            console.log('python3 no encontrado, intentando con python...');
+            
             // Intentar con 'python' si 'python3' no funciona
-            const pythonAlt = spawn('python', ['--version']);
-            pythonAlt.on('error', () => resolve(false));
-            pythonAlt.on('close', () => resolve('python'));
+            const python = spawn('python', ['--version'], { shell: true });
+            python.on('error', () => {
+                console.log('❌ Python no encontrado en el sistema');
+                resolve(false);
+            });
+            python.on('close', (code) => {
+                if (code === 0) {
+                    console.log('✅ Python encontrado como "python"');
+                    resolve('python');
+                } else {
+                    console.log('❌ Error ejecutando python');
+                    resolve(false);
+                }
+            });
         });
-        python.on('close', () => resolve('python3'));
+        python3.on('close', (code) => {
+            if (code === 0) {
+                console.log('✅ Python encontrado como "python3"');
+                resolve('python3');
+            } else {
+                console.log('❌ Error ejecutando python3');
+                resolve(false);
+            }
+        });
     });
 }
 
 // Función para instalar Flask automáticamente
 function installFlask(pythonCmd) {
     return new Promise((resolve, reject) => {
-        console.log('Instalando Flask automáticamente...');
-        const pip = spawn(pythonCmd, ['-m', 'pip', 'install', 'flask', 'openpyxl', 'python-docx', 'reportlab']);
+        console.log('🔄 Intentando instalar Flask y dependencias...');
         
-        pip.on('error', (error) => {
-            console.error('Error instalando Flask:', error);
-            reject(error);
+        // Verificar si pip está disponible
+        const pipCheck = spawn(pythonCmd, ['-m', 'pip', '--version'], { shell: true });
+        
+        pipCheck.on('error', (error) => {
+            console.error('❌ pip no está disponible:', error);
+            reject(new Error('pip no está disponible. Instale Python con pip incluido.'));
+            return;
         });
         
-        pip.on('close', (code) => {
-            if (code === 0) {
-                console.log('Flask instalado exitosamente');
-                resolve(true);
-            } else {
-                console.error('Error instalando Flask, código:', code);
-                reject(new Error(`Error instalando Flask, código: ${code}`));
+        pipCheck.on('close', (code) => {
+            if (code !== 0) {
+                console.error('❌ pip no está disponible (código:', code, ')');
+                reject(new Error('pip no está disponible. Reinstale Python con pip incluido.'));
+                return;
             }
+            
+            console.log('✅ pip disponible, instalando Flask...');
+            
+            // Intentar instalar Flask con pip
+            const pip = spawn(pythonCmd, ['-m', 'pip', 'install', '--user', 'flask', 'openpyxl', 'python-docx', 'reportlab'], { 
+                shell: true,
+                stdio: ['pipe', 'pipe', 'pipe']
+            });
+            
+            let stdout = '';
+            let stderr = '';
+            
+            if (pip.stdout) {
+                pip.stdout.on('data', (data) => {
+                    stdout += data.toString();
+                    console.log('pip stdout:', data.toString().trim());
+                });
+            }
+            
+            if (pip.stderr) {
+                pip.stderr.on('data', (data) => {
+                    stderr += data.toString();
+                    console.error('pip stderr:', data.toString().trim());
+                });
+            }
+            
+            pip.on('error', (error) => {
+                console.error('❌ Error instalando Flask:', error);
+                reject(new Error(`Error instalando Flask: ${error.message}`));
+            });
+            
+            pip.on('close', (code) => {
+                if (code === 0) {
+                    console.log('✅ Flask instalado exitosamente');
+                    resolve(true);
+                } else {
+                    console.error('❌ Error instalando Flask, código:', code);
+                    console.error('❌ stderr:', stderr);
+                    reject(new Error(`Error instalando Flask (código ${code}): ${stderr || 'Error desconocido'}`));
+                }
+            });
         });
     });
 }
@@ -87,84 +153,158 @@ function checkFlaskReady() {
 
 // Función para iniciar el servidor Flask
 async function startFlaskServer() {
+    console.log('🚀 Iniciando servidor Flask...');
     const pythonCmd = await checkPython();
     
     if (!pythonCmd) {
-        console.log('Python no encontrado, usando servidor de fallback...');
+        console.log('⚠️ Python no encontrado, usando servidor de fallback...');
         
         try {
             // Usar servidor de fallback de Node.js
             await createFallbackServer(FLASK_PORT);
-            console.log('Servidor de fallback iniciado exitosamente');
+            console.log('✅ Servidor de fallback iniciado exitosamente');
             
-            // Mostrar advertencia al usuario
+            // Mostrar advertencia al usuario después de que la ventana esté lista
             setTimeout(() => {
-                dialog.showMessageBox(mainWindow, {
-                    type: 'warning',
-                    title: 'Funcionalidad limitada',
-                    message: 'Python no está instalado',
-                    detail: 'La aplicación está funcionando con funcionalidad limitada. Para obtener todas las características, instale Python desde python.org',
-                    buttons: ['Entendido', 'Descargar Python'],
-                    defaultId: 0
-                }).then((result) => {
-                    if (result.response === 1) {
-                        shell.openExternal('https://www.python.org/downloads/');
-                    }
-                });
-            }, 2000);
+                if (mainWindow) {
+                    dialog.showMessageBox(mainWindow, {
+                        type: 'warning',
+                        title: 'Python no encontrado',
+                        message: 'La aplicación está funcionando con funcionalidad limitada',
+                        detail: `Python no está instalado en su sistema.
+
+Para obtener todas las características de SHW Reader, necesita instalar Python:
+
+1. Descargue Python desde python.org
+2. Durante la instalación, marque "Add Python to PATH"
+3. Reinicie SHW Reader
+
+Actualmente puede visualizar archivos SHW con funciones básicas.`,
+                        buttons: ['Entendido', 'Descargar Python', 'Ver Tutorial'],
+                        defaultId: 0
+                    }).then((result) => {
+                        if (result.response === 1) {
+                            shell.openExternal('https://www.python.org/downloads/');
+                        } else if (result.response === 2) {
+                            shell.openExternal('https://github.com/Maikboarder/SHW-Reader#installation');
+                        }
+                    });
+                }
+            }, 3000);
             
             return Promise.resolve();
         } catch (error) {
-            console.error('Error iniciando servidor de fallback:', error);
-            dialog.showErrorBox(
-                'Error del servidor',
-                'No se pudo iniciar el servidor interno. Por favor, reinicie la aplicación.'
-            );
+            console.error('❌ Error iniciando servidor de fallback:', error);
+            if (mainWindow) {
+                dialog.showErrorBox(
+                    'Error crítico del servidor',
+                    `No se pudo iniciar ningún servidor interno.
+
+Error: ${error.message}
+
+Por favor:
+1. Cierre la aplicación
+2. Instale Python desde python.org
+3. Reinicie SHW Reader
+
+Si el problema persiste, contacte al soporte.`
+                );
+            }
             app.quit();
             return Promise.reject(error);
         }
     }
 
+    console.log(`✅ Python encontrado: ${pythonCmd}`);
+
     // Verificar si Flask está instalado
     return new Promise((resolve, reject) => {
-        const flaskCheck = spawn(pythonCmd, ['-c', 'import flask; print("Flask OK")']);
+        console.log('🔍 Verificando si Flask está instalado...');
+        const flaskCheck = spawn(pythonCmd, ['-c', 'import flask; print("Flask OK")'], { shell: true });
         
-        flaskCheck.on('error', () => {
-            reject('Error al verificar Flask');
+        flaskCheck.on('error', (error) => {
+            console.error('❌ Error al verificar Flask:', error);
+            reject(`Error al verificar Flask: ${error.message}`);
         });
         
         flaskCheck.on('close', (code) => {
             if (code !== 0) {
+                console.log('⚠️ Flask no está instalado, intentando instalación automática...');
+                
                 // Intentar instalar Flask automáticamente
                 installFlask(pythonCmd).then(() => {
-                    // Verificar nuevamente si Flask está disponible después de la instalación
-                    const flaskCheckPostInstall = spawn(pythonCmd, ['-c', 'import flask; print("Flask OK")']);
+                    console.log('🔄 Verificando Flask después de la instalación...');
                     
-                    flaskCheckPostInstall.on('error', () => {
-                        reject('Error al verificar Flask después de la instalación');
+                    // Verificar nuevamente si Flask está disponible después de la instalación
+                    const flaskCheckPostInstall = spawn(pythonCmd, ['-c', 'import flask; print("Flask OK")'], { shell: true });
+                    
+                    flaskCheckPostInstall.on('error', (error) => {
+                        console.error('❌ Error verificando Flask después de instalación:', error);
+                        showPythonInstallationError();
+                        reject(`Error verificando Flask después de instalación: ${error.message}`);
                     });
                     
                     flaskCheckPostInstall.on('close', (code) => {
                         if (code !== 0) {
-                            dialog.showErrorBox(
-                                'Flask no encontrado',
-                                'Esta aplicación requiere Flask. Instálalo con: pip3 install flask'
-                            );
-                            app.quit();
+                            console.error('❌ Flask sigue sin funcionar después de la instalación');
+                            showPythonInstallationError();
                             return;
                         }
                         
+                        console.log('✅ Flask verificado después de la instalación');
                         // Iniciar el servidor Flask después de la instalación exitosa
                         startFlaskServerInternal(pythonCmd, resolve, reject);
                     });
-                }).catch(reject);
+                }).catch((error) => {
+                    console.error('❌ Error durante la instalación automática:', error);
+                    showPythonInstallationError(error.message);
+                    reject(error);
+                });
                 return;
             }
             
+            console.log('✅ Flask ya está instalado');
             // Iniciar el servidor Flask directamente
             startFlaskServerInternal(pythonCmd, resolve, reject);
         });
     });
+}
+
+// Función para mostrar error de instalación de Python
+function showPythonInstallationError(errorDetails = '') {
+    setTimeout(() => {
+        if (mainWindow) {
+            dialog.showMessageBox(mainWindow, {
+                type: 'error',
+                title: 'Error instalando Python',
+                message: 'No se pudo instalar Flask automáticamente',
+                detail: `${errorDetails ? 'Error: ' + errorDetails + '\n\n' : ''}Para usar todas las funciones de SHW Reader, instale Python manualmente:
+
+1. Descargue Python desde python.org
+2. Durante la instalación, marque "Add Python to PATH"
+3. Abra una terminal y ejecute: pip install flask openpyxl python-docx reportlab
+4. Reinicie SHW Reader
+
+Mientras tanto, puede usar la funcionalidad básica con el servidor de emergencia.`,
+                buttons: ['Usar Modo Básico', 'Descargar Python', 'Ver Tutorial'],
+                defaultId: 0
+            }).then((result) => {
+                if (result.response === 1) {
+                    shell.openExternal('https://www.python.org/downloads/');
+                } else if (result.response === 2) {
+                    shell.openExternal('https://github.com/Maikboarder/SHW-Reader#installation');
+                }
+                
+                // Si el usuario elige modo básico, iniciar servidor de fallback
+                if (result.response === 0) {
+                    createFallbackServer(FLASK_PORT).catch((error) => {
+                        console.error('Error iniciando servidor de fallback:', error);
+                        app.quit();
+                    });
+                }
+            });
+        }
+    }, 1000);
 }
 
 // Función para crear la ventana principal
