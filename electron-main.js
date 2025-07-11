@@ -154,216 +154,15 @@ async function startFlaskServer() {
                             return;
                         }
                         
-                        // Iniciar el servidor Flask
-                        // Determinar la ruta correcta del archivo Python
-                        let appPath;
-                        let workingDir;
-                        
-                        // Lista de posibles ubicaciones para el archivo Python
-                        const possiblePaths = [];
-                        
-                        if (app.isPackaged) {
-                            // En modo empaquetado, intentar varias ubicaciones posibles
-                            const resourcesPath = process.resourcesPath;
-                            const appResourcesPath = path.join(resourcesPath, 'app');
-                            
-                            possiblePaths.push(
-                                path.join(appResourcesPath, 'app_simple.py'),
-                                path.join(appResourcesPath, 'app_desktop.py'),
-                                path.join(resourcesPath, 'app_simple.py'),
-                                path.join(resourcesPath, 'app_desktop.py'),
-                                path.join(__dirname, 'app_simple.py'),
-                                path.join(__dirname, 'app_desktop.py'),
-                                path.join(process.cwd(), 'app_simple.py'),
-                                path.join(process.cwd(), 'app_desktop.py')
-                            );
-                        } else {
-                            // En modo desarrollo
-                            possiblePaths.push(
-                                path.join(__dirname, 'app_simple.py'),
-                                path.join(__dirname, 'app_desktop.py'),
-                                path.join(process.cwd(), 'app_simple.py'),
-                                path.join(process.cwd(), 'app_desktop.py')
-                            );
-                        }
-                        
-                        // Buscar el archivo en las ubicaciones posibles
-                        let foundPath = null;
-                        for (const testPath of possiblePaths) {
-                            console.log('Verificando ruta:', testPath);
-                            if (fs.existsSync(testPath)) {
-                                foundPath = testPath;
-                                console.log('Archivo encontrado en:', foundPath);
-                                break;
-                            }
-                        }
-                        
-                        if (!foundPath) {
-                            const error = new Error(`No se encontró app_desktop.py en ninguna de las ubicaciones: ${possiblePaths.join(', ')}`);
-                            console.error(error.message);
-                            dialog.showErrorBox(
-                                'Archivo no encontrado',
-                                `No se encontró el archivo app_desktop.py.\nUbicaciones verificadas:\n${possiblePaths.join('\n')}`
-                            );
-                            reject(error);
-                            return;
-                        }
-                        
-                        appPath = foundPath;
-                        workingDir = path.dirname(appPath);
-                        
-                        console.log('Ejecutando:', appPath);
-                        console.log('Directorio de trabajo:', workingDir);
-                        console.log('Puerto Flask:', FLASK_PORT);
-                        console.log('Comando Python:', pythonCmd);
-                        console.log('Sistema operativo:', process.platform);
-                        
-                        // Configurar opciones específicas para Windows
-                        const spawnOptions = {
-                            cwd: workingDir,
-                            env: {
-                                ...process.env,
-                                PORT: FLASK_PORT.toString(),
-                                PYTHONUNBUFFERED: '1'
-                            }
-                        };
-                        
-                        // En Windows, añadir configuraciones específicas
-                        if (process.platform === 'win32') {
-                            spawnOptions.shell = true;
-                            spawnOptions.stdio = ['pipe', 'pipe', 'pipe'];
-                        } else {
-                            spawnOptions.stdio = 'inherit';
-                        }
-                        
-                        flaskProcess = spawn(pythonCmd, [appPath], spawnOptions);
-                        
-                        // Capturar salida para debugging en Windows
-                        if (process.platform === 'win32' && flaskProcess.stdout && flaskProcess.stderr) {
-                            flaskProcess.stdout.on('data', (data) => {
-                                console.log('Flask stdout:', data.toString());
-                            });
-                            
-                            flaskProcess.stderr.on('data', (data) => {
-                                console.error('Flask stderr:', data.toString());
-                            });
-                        }
-                        
-                        flaskProcess.on('error', (err) => {
-                            console.error('Error al iniciar Flask:', err);
-                            const errorMsg = `Error iniciando servidor Flask: ${err.message}`;
-                            
-                            // Mostrar error específico en Windows
-                            if (process.platform === 'win32') {
-                                dialog.showErrorBox(
-                                    'Error del servidor interno',
-                                    `No se pudo iniciar el servidor interno.\n\nDetalles técnicos:\n${errorMsg}\n\nAsegúrese de que Python esté instalado correctamente.`
-                                );
-                            }
-                            
-                            reject(err);
-                        });
-                        
-                        flaskProcess.on('close', (code) => {
-                            console.log('Flask process closed with code:', code);
-                            if (code !== 0) {
-                                const errorMsg = `El servidor Flask se cerró con código: ${code}`;
-                                console.error(errorMsg);
-                                
-                                if (process.platform === 'win32') {
-                                    dialog.showErrorBox(
-                                        'Error del servidor interno',
-                                        `${errorMsg}\n\nPuede que falten dependencias de Python. La aplicación intentará instalarlas automáticamente en el próximo inicio.`
-                                    );
-                                }
-                            }
-                        });
-                        
-                        // Esperar un momento para que el servidor se inicie
-                        setTimeout(() => {
-                            console.log('Flask debería estar listo ahora');
-                            resolve();
-                        }, 3000); // Aumentar a 3 segundos
+                        // Iniciar el servidor Flask después de la instalación exitosa
+                        startFlaskServerInternal(pythonCmd, resolve, reject);
                     });
                 }).catch(reject);
                 return;
             }
             
-            // Iniciar el servidor Flask
-            // Determinar la ruta correcta del archivo Python
-            let appPath;
-            let workingDir;
-            
-            // Lista de posibles ubicaciones para el archivo Python
-            const possiblePaths = [];
-            
-            if (app.isPackaged) {
-                // En modo empaquetado, intentar varias ubicaciones posibles
-                const resourcesPath = process.resourcesPath;
-                const appResourcesPath = path.join(resourcesPath, 'app');
-                
-                possiblePaths.push(
-                    path.join(appResourcesPath, 'app_desktop.py'),
-                    path.join(resourcesPath, 'app_desktop.py'),
-                    path.join(__dirname, 'app_desktop.py'),
-                    path.join(process.cwd(), 'app_desktop.py')
-                );
-            } else {
-                // En modo desarrollo
-                possiblePaths.push(
-                    path.join(__dirname, 'app_desktop.py'),
-                    path.join(process.cwd(), 'app_desktop.py')
-                );
-            }
-            
-            // Buscar el archivo en las ubicaciones posibles
-            let foundPath = null;
-            for (const testPath of possiblePaths) {
-                console.log('Verificando ruta:', testPath);
-                if (fs.existsSync(testPath)) {
-                    foundPath = testPath;
-                    console.log('Archivo encontrado en:', foundPath);
-                    break;
-                }
-            }
-            
-            if (!foundPath) {
-                const error = new Error(`No se encontró app_desktop.py en ninguna de las ubicaciones: ${possiblePaths.join(', ')}`);
-                console.error(error.message);
-                dialog.showErrorBox(
-                    'Archivo no encontrado',
-                    `No se encontró el archivo app_desktop.py.\nUbicaciones verificadas:\n${possiblePaths.join('\n')}`
-                );
-                reject(error);
-                return;
-            }
-            
-            appPath = foundPath;
-            workingDir = path.dirname(appPath);
-            
-            console.log('Ejecutando:', appPath);
-            console.log('Directorio de trabajo:', workingDir);
-            console.log('Puerto Flask:', FLASK_PORT);
-            
-            flaskProcess = spawn(pythonCmd, [appPath], {
-                cwd: workingDir,
-                stdio: 'inherit',
-                env: {
-                    ...process.env,
-                    PORT: FLASK_PORT.toString()
-                }
-            });
-            
-            flaskProcess.on('error', (err) => {
-                console.error('Error al iniciar Flask:', err);
-                reject(err);
-            });
-            
-            // Esperar un momento para que el servidor se inicie
-            setTimeout(() => {
-                console.log('Flask debería estar listo ahora');
-                resolve();
-            }, 3000); // Aumentar a 3 segundos
+            // Iniciar el servidor Flask directamente
+            startFlaskServerInternal(pythonCmd, resolve, reject);
         });
     });
 }
@@ -1021,3 +820,136 @@ app.on('web-contents-created', (event, contents) => {
         }
     });
 });
+
+// Función interna para iniciar el servidor Flask (evita duplicación de código)
+function startFlaskServerInternal(pythonCmd, resolve, reject) {
+    // Determinar la ruta correcta del archivo Python
+    let appPath;
+    let workingDir;
+    
+    // Lista de posibles ubicaciones para el archivo Python
+    const possiblePaths = [];
+    
+    if (app.isPackaged) {
+        // En modo empaquetado, intentar varias ubicaciones posibles
+        const resourcesPath = process.resourcesPath;
+        const appResourcesPath = path.join(resourcesPath, 'app');
+        
+        possiblePaths.push(
+            path.join(appResourcesPath, 'app_simple.py'),
+            path.join(appResourcesPath, 'app_desktop.py'),
+            path.join(resourcesPath, 'app_simple.py'),
+            path.join(resourcesPath, 'app_desktop.py'),
+            path.join(__dirname, 'app_simple.py'),
+            path.join(__dirname, 'app_desktop.py'),
+            path.join(process.cwd(), 'app_simple.py'),
+            path.join(process.cwd(), 'app_desktop.py')
+        );
+    } else {
+        // En modo desarrollo
+        possiblePaths.push(
+            path.join(__dirname, 'app_simple.py'),
+            path.join(__dirname, 'app_desktop.py'),
+            path.join(process.cwd(), 'app_simple.py'),
+            path.join(process.cwd(), 'app_desktop.py')
+        );
+    }
+    
+    // Buscar el archivo en las ubicaciones posibles
+    let foundPath = null;
+    for (const testPath of possiblePaths) {
+        console.log('Verificando ruta:', testPath);
+        if (fs.existsSync(testPath)) {
+            foundPath = testPath;
+            console.log('Archivo encontrado en:', foundPath);
+            break;
+        }
+    }
+    
+    if (!foundPath) {
+        const error = new Error(`No se encontró archivo Python en ninguna de las ubicaciones: ${possiblePaths.join(', ')}`);
+        console.error(error.message);
+        dialog.showErrorBox(
+            'Archivo no encontrado',
+            `No se encontró el archivo Python del servidor.\nUbicaciones verificadas:\n${possiblePaths.join('\n')}`
+        );
+        reject(error);
+        return;
+    }
+    
+    appPath = foundPath;
+    workingDir = path.dirname(appPath);
+    
+    console.log('Ejecutando:', appPath);
+    console.log('Directorio de trabajo:', workingDir);
+    console.log('Puerto Flask:', FLASK_PORT);
+    console.log('Comando Python:', pythonCmd);
+    console.log('Sistema operativo:', process.platform);
+    
+    // Configurar opciones específicas para Windows
+    const spawnOptions = {
+        cwd: workingDir,
+        env: {
+            ...process.env,
+            PORT: FLASK_PORT.toString(),
+            PYTHONUNBUFFERED: '1'
+        }
+    };
+    
+    // En Windows, añadir configuraciones específicas
+    if (process.platform === 'win32') {
+        spawnOptions.shell = true;
+        spawnOptions.stdio = ['pipe', 'pipe', 'pipe'];
+    } else {
+        spawnOptions.stdio = 'inherit';
+    }
+    
+    flaskProcess = spawn(pythonCmd, [appPath], spawnOptions);
+    
+    // Capturar salida para debugging en Windows
+    if (process.platform === 'win32' && flaskProcess.stdout && flaskProcess.stderr) {
+        flaskProcess.stdout.on('data', (data) => {
+            console.log('Flask stdout:', data.toString());
+        });
+        
+        flaskProcess.stderr.on('data', (data) => {
+            console.error('Flask stderr:', data.toString());
+        });
+    }
+    
+    flaskProcess.on('error', (err) => {
+        console.error('Error al iniciar Flask:', err);
+        const errorMsg = `Error iniciando servidor Flask: ${err.message}`;
+        
+        // Mostrar error específico en Windows
+        if (process.platform === 'win32') {
+            dialog.showErrorBox(
+                'Error del servidor interno',
+                `No se pudo iniciar el servidor interno.\n\nDetalles técnicos:\n${errorMsg}\n\nAsegúrese de que Python esté instalado correctamente.`
+            );
+        }
+        
+        reject(err);
+    });
+    
+    flaskProcess.on('close', (code) => {
+        console.log('Flask process closed with code:', code);
+        if (code !== 0) {
+            const errorMsg = `El servidor Flask se cerró con código: ${code}`;
+            console.error(errorMsg);
+            
+            if (process.platform === 'win32') {
+                dialog.showErrorBox(
+                    'Error del servidor interno',
+                    `${errorMsg}\n\nPuede que falten dependencias de Python. La aplicación intentará instalarlas automáticamente en el próximo inicio.`
+                );
+            }
+        }
+    });
+    
+    // Esperar un momento para que el servidor se inicie
+    setTimeout(() => {
+        console.log('Flask debería estar listo ahora');
+        resolve();
+    }, 3000); // Aumentar a 3 segundos
+}
