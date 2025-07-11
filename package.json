@@ -51,7 +51,9 @@
     "files": [
       "electron-main.js",
       "preload.js",
+      "fallback-server.js",
       "app_desktop.py",
+      "app_simple.py",
       "templates/**/*",
       "static/**/*",
       "uploads/**/*",
@@ -64,6 +66,10 @@
       {
         "from": "app_desktop.py",
         "to": "app/app_desktop.py"
+      },
+      {
+        "from": "app_simple.py",
+        "to": "app/app_simple.py"
       },
       {
         "from": "templates",
@@ -160,5 +166,9 @@
       "shortcutName": "SHW Reader",
       "include": "installer.nsh"
     }
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "multer": "^2.0.1"
   }
 }

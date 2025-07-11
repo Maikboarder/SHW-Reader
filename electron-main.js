@@ -3,6 +3,7 @@ const path = require('path');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const http = require('http');
+const { createFallbackServer } = require('./fallback-server');
 
 // Variables globales
 let mainWindow;
@@ -89,12 +90,39 @@ async function startFlaskServer() {
     const pythonCmd = await checkPython();
     
     if (!pythonCmd) {
-        dialog.showErrorBox(
-            'Python no encontrado',
-            'Esta aplicación requiere Python 3.x para funcionar. Por favor, instala Python desde python.org'
-        );
-        app.quit();
-        return;
+        console.log('Python no encontrado, usando servidor de fallback...');
+        
+        try {
+            // Usar servidor de fallback de Node.js
+            await createFallbackServer(FLASK_PORT);
+            console.log('Servidor de fallback iniciado exitosamente');
+            
+            // Mostrar advertencia al usuario
+            setTimeout(() => {
+                dialog.showMessageBox(mainWindow, {
+                    type: 'warning',
+                    title: 'Funcionalidad limitada',
+                    message: 'Python no está instalado',
+                    detail: 'La aplicación está funcionando con funcionalidad limitada. Para obtener todas las características, instale Python desde python.org',
+                    buttons: ['Entendido', 'Descargar Python'],
+                    defaultId: 0
+                }).then((result) => {
+                    if (result.response === 1) {
+                        shell.openExternal('https://www.python.org/downloads/');
+                    }
+                });
+            }, 2000);
+            
+            return Promise.resolve();
+        } catch (error) {
+            console.error('Error iniciando servidor de fallback:', error);
+            dialog.showErrorBox(
+                'Error del servidor',
+                'No se pudo iniciar el servidor interno. Por favor, reinicie la aplicación.'
+            );
+            app.quit();
+            return Promise.reject(error);
+        }
     }
 
     // Verificar si Flask está instalado
@@ -140,15 +168,21 @@ async function startFlaskServer() {
                             const appResourcesPath = path.join(resourcesPath, 'app');
                             
                             possiblePaths.push(
+                                path.join(appResourcesPath, 'app_simple.py'),
                                 path.join(appResourcesPath, 'app_desktop.py'),
+                                path.join(resourcesPath, 'app_simple.py'),
                                 path.join(resourcesPath, 'app_desktop.py'),
+                                path.join(__dirname, 'app_simple.py'),
                                 path.join(__dirname, 'app_desktop.py'),
+                                path.join(process.cwd(), 'app_simple.py'),
                                 path.join(process.cwd(), 'app_desktop.py')
                             );
                         } else {
                             // En modo desarrollo
                             possiblePaths.push(
+                                path.join(__dirname, 'app_simple.py'),
                                 path.join(__dirname, 'app_desktop.py'),
+                                path.join(process.cwd(), 'app_simple.py'),
                                 path.join(process.cwd(), 'app_desktop.py')
                             );
                         }
@@ -181,19 +215,68 @@ async function startFlaskServer() {
                         console.log('Ejecutando:', appPath);
                         console.log('Directorio de trabajo:', workingDir);
                         console.log('Puerto Flask:', FLASK_PORT);
+                        console.log('Comando Python:', pythonCmd);
+                        console.log('Sistema operativo:', process.platform);
                         
-                        flaskProcess = spawn(pythonCmd, [appPath], {
+                        // Configurar opciones específicas para Windows
+                        const spawnOptions = {
                             cwd: workingDir,
-                            stdio: 'inherit',
                             env: {
                                 ...process.env,
-                                PORT: FLASK_PORT.toString()
+                                PORT: FLASK_PORT.toString(),
+                                PYTHONUNBUFFERED: '1'
                             }
-                        });
+                        };
+                        
+                        // En Windows, añadir configuraciones específicas
+                        if (process.platform === 'win32') {
+                            spawnOptions.shell = true;
+                            spawnOptions.stdio = ['pipe', 'pipe', 'pipe'];
+                        } else {
+                            spawnOptions.stdio = 'inherit';
+                        }
+                        
+                        flaskProcess = spawn(pythonCmd, [appPath], spawnOptions);
+                        
+                        // Capturar salida para debugging en Windows
+                        if (process.platform === 'win32' && flaskProcess.stdout && flaskProcess.stderr) {
+                            flaskProcess.stdout.on('data', (data) => {
+                                console.log('Flask stdout:', data.toString());
+                            });
+                            
+                            flaskProcess.stderr.on('data', (data) => {
+                                console.error('Flask stderr:', data.toString());
+                            });
+                        }
                         
                         flaskProcess.on('error', (err) => {
                             console.error('Error al iniciar Flask:', err);
+                            const errorMsg = `Error iniciando servidor Flask: ${err.message}`;
+                            
+                            // Mostrar error específico en Windows
+                            if (process.platform === 'win32') {
+                                dialog.showErrorBox(
+                                    'Error del servidor interno',
+                                    `No se pudo iniciar el servidor interno.\n\nDetalles técnicos:\n${errorMsg}\n\nAsegúrese de que Python esté instalado correctamente.`
+                                );
+                            }
+                            
                             reject(err);
+                        });
+                        
+                        flaskProcess.on('close', (code) => {
+                            console.log('Flask process closed with code:', code);
+                            if (code !== 0) {
+                                const errorMsg = `El servidor Flask se cerró con código: ${code}`;
+                                console.error(errorMsg);
+                                
+                                if (process.platform === 'win32') {
+                                    dialog.showErrorBox(
+                                        'Error del servidor interno',
+                                        `${errorMsg}\n\nPuede que falten dependencias de Python. La aplicación intentará instalarlas automáticamente en el próximo inicio.`
+                                    );
+                                }
+                            }
                         });
                         
                         // Esperar un momento para que el servidor se inicie
