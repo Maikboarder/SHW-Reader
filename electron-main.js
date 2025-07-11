@@ -4,10 +4,11 @@ const { spawn } = require('child_process');
 const fs = require('fs');
 const http = require('http');
 const { createFallbackServer } = require('./fallback-server');
+const { EmbeddedFlaskServer } = require('./embedded-flask-manager');
 
 // Variables globales
 let mainWindow;
-let flaskProcess;
+let flaskServer; // Usar el gestor del servidor embebido
 let currentLanguage = 'es'; // Idioma actual
 let menuTranslations = {}; // Cache de traducciones para el menú
 const FLASK_PORT = process.env.FLASK_PORT || 5001;
@@ -151,124 +152,114 @@ function checkFlaskReady() {
     });
 }
 
-// Función para iniciar el servidor Flask
+// Función para iniciar el servidor Flask (SOLUCIÓN DEFINITIVA)
 async function startFlaskServer() {
-    console.log('🚀 Iniciando servidor Flask...');
-    const pythonCmd = await checkPython();
+    console.log('🚀 === INICIO SERVIDOR DEFINITIVO ===');
     
-    if (!pythonCmd) {
-        console.log('⚠️ Python no encontrado, usando servidor de fallback...');
+    // Intentar servidor embebido primero
+    flaskServer = new EmbeddedFlaskServer(FLASK_PORT);
+    
+    try {
+        await flaskServer.start();
+        console.log('✅ Servidor embebido iniciado exitosamente');
         
+        // Mostrar mensaje de éxito al usuario
+        setTimeout(() => {
+            if (mainWindow) {
+                dialog.showMessageBox(mainWindow, {
+                    type: 'info',
+                    title: '🚀 Servidor interno activo',
+                    message: 'SHW Reader funcionando perfectamente',
+                    detail: `✅ Estado: Servidor Flask embebido funcionando
+
+🔧 Características disponibles:
+✅ Procesamiento completo de archivos SHW
+✅ Exportación a CSV, Excel, Word y PDF
+✅ Interfaz de usuario completa
+✅ Sin dependencias externas
+✅ Funcionamiento inmediato
+
+🎉 ¡Todo listo para usar!`,
+                    buttons: ['Perfecto'],
+                    defaultId: 0
+                });
+            }
+        }, 3000);
+        
+        return Promise.resolve();
+        
+    } catch (error) {
+        console.error('❌ Error con servidor embebido:', error.message);
+        console.log('⚠️ Intentando alternativas...');
+        
+        // Fallback 1: Python externo
+        const pythonCmd = await checkPython();
+        if (pythonCmd) {
+            console.log('🔄 Usando Python externo como fallback...');
+            try {
+                await startPythonFlaskServer(pythonCmd);
+                return Promise.resolve();
+            } catch (pythonError) {
+                console.error('❌ Error con Python externo:', pythonError.message);
+            }
+        }
+        
+        // Fallback 2: Servidor Node.js básico
+        console.log('🔄 Usando servidor de emergencia...');
         try {
-            // Usar servidor de fallback de Node.js
             await createFallbackServer(FLASK_PORT);
-            console.log('✅ Servidor de fallback iniciado exitosamente');
+            console.log('✅ Servidor de emergencia iniciado');
             
-            // Mostrar advertencia al usuario después de que la ventana esté lista
             setTimeout(() => {
                 if (mainWindow) {
                     dialog.showMessageBox(mainWindow, {
                         type: 'warning',
-                        title: 'Python no encontrado',
-                        message: 'La aplicación está funcionando con funcionalidad limitada',
-                        detail: `Python no está instalado en su sistema.
+                        title: 'Modo de emergencia',
+                        message: 'Funcionamiento con limitaciones',
+                        detail: `⚠️ Estado: Servidor de emergencia activo
 
-Para obtener todas las características de SHW Reader, necesita instalar Python:
+🔧 Características disponibles:
+✅ Interfaz de usuario básica
+✅ Visualización de archivos SHW
+❌ Exportación completa
+❌ Procesamiento avanzado
 
-1. Descargue Python desde python.org
-2. Durante la instalación, marque "Add Python to PATH"
-3. Reinicie SHW Reader
-
-Actualmente puede visualizar archivos SHW con funciones básicas.`,
-                        buttons: ['Entendido', 'Descargar Python', 'Ver Tutorial'],
+💡 Para funcionalidad completa, instale Python desde python.org`,
+                        buttons: ['Continuar', 'Descargar Python'],
                         defaultId: 0
                     }).then((result) => {
                         if (result.response === 1) {
                             shell.openExternal('https://www.python.org/downloads/');
-                        } else if (result.response === 2) {
-                            shell.openExternal('https://github.com/Maikboarder/SHW-Reader#installation');
                         }
                     });
                 }
             }, 3000);
             
             return Promise.resolve();
-        } catch (error) {
-            console.error('❌ Error iniciando servidor de fallback:', error);
+        } catch (fallbackError) {
+            console.error('❌ Error crítico - todos los servidores fallaron');
+            
             if (mainWindow) {
                 dialog.showErrorBox(
-                    'Error crítico del servidor',
-                    `No se pudo iniciar ningún servidor interno.
+                    'Error crítico',
+                    `No se pudo iniciar ningún servidor.
 
-Error: ${error.message}
+Errores:
+- Servidor embebido: ${error.message}
+- Python externo: ${pythonCmd ? 'Error de Flask' : 'No encontrado'}
+- Servidor emergencia: ${fallbackError.message}
 
-Por favor:
-1. Cierre la aplicación
-2. Instale Python desde python.org
-3. Reinicie SHW Reader
-
-Si el problema persiste, contacte al soporte.`
+La aplicación se cerrará.`
                 );
             }
+            
             app.quit();
-            return Promise.reject(error);
+            return Promise.reject(new Error('Fallo crítico de todos los servidores'));
         }
     }
-
-    console.log(`✅ Python encontrado: ${pythonCmd}`);
-
-    // Verificar si Flask está instalado
-    return new Promise((resolve, reject) => {
-        console.log('🔍 Verificando si Flask está instalado...');
-        const flaskCheck = spawn(pythonCmd, ['-c', 'import flask; print("Flask OK")'], { shell: true });
-        
-        flaskCheck.on('error', (error) => {
-            console.error('❌ Error al verificar Flask:', error);
-            reject(`Error al verificar Flask: ${error.message}`);
-        });
-        
-        flaskCheck.on('close', (code) => {
-            if (code !== 0) {
-                console.log('⚠️ Flask no está instalado, intentando instalación automática...');
-                
-                // Intentar instalar Flask automáticamente
-                installFlask(pythonCmd).then(() => {
-                    console.log('🔄 Verificando Flask después de la instalación...');
-                    
-                    // Verificar nuevamente si Flask está disponible después de la instalación
-                    const flaskCheckPostInstall = spawn(pythonCmd, ['-c', 'import flask; print("Flask OK")'], { shell: true });
-                    
-                    flaskCheckPostInstall.on('error', (error) => {
-                        console.error('❌ Error verificando Flask después de instalación:', error);
-                        showPythonInstallationError();
-                        reject(`Error verificando Flask después de instalación: ${error.message}`);
-                    });
-                    
-                    flaskCheckPostInstall.on('close', (code) => {
-                        if (code !== 0) {
-                            console.error('❌ Flask sigue sin funcionar después de la instalación');
-                            showPythonInstallationError();
-                            return;
-                        }
-                        
-                        console.log('✅ Flask verificado después de la instalación');
-                        // Iniciar el servidor Flask después de la instalación exitosa
-                        startFlaskServerInternal(pythonCmd, resolve, reject);
-                    });
-                }).catch((error) => {
-                    console.error('❌ Error durante la instalación automática:', error);
-                    showPythonInstallationError(error.message);
-                    reject(error);
-                });
-                return;
-            }
-            
-            console.log('✅ Flask ya está instalado');
-            // Iniciar el servidor Flask directamente
-            startFlaskServerInternal(pythonCmd, resolve, reject);
-        });
-    });
 }
+
+// Funciones obsoletas removidas - ahora usamos EmbeddedFlaskServer
 
 // Función para mostrar error de instalación de Python
 function showPythonInstallationError(errorDetails = '') {
@@ -944,9 +935,10 @@ app.on('window-all-closed', () => {
 });
 
 app.on('before-quit', () => {
-    // Terminar el proceso de Flask
-    if (flaskProcess) {
-        flaskProcess.kill();
+    // Terminar el servidor Flask embebido
+    if (flaskServer && flaskServer.isServerRunning()) {
+        console.log('🛑 Cerrando servidor embebido...');
+        flaskServer.stop();
     }
 });
 
@@ -961,135 +953,62 @@ app.on('web-contents-created', (event, contents) => {
     });
 });
 
-// Función interna para iniciar el servidor Flask (evita duplicación de código)
-function startFlaskServerInternal(pythonCmd, resolve, reject) {
-    // Determinar la ruta correcta del archivo Python
-    let appPath;
-    let workingDir;
-    
-    // Lista de posibles ubicaciones para el archivo Python
-    const possiblePaths = [];
-    
-    if (app.isPackaged) {
-        // En modo empaquetado, intentar varias ubicaciones posibles
-        const resourcesPath = process.resourcesPath;
-        const appResourcesPath = path.join(resourcesPath, 'app');
+// Función startFlaskServerInternal removida - lógica integrada en startPythonFlaskServer
+
+// Función para iniciar servidor Flask con Python externo (fallback)
+async function startPythonFlaskServer(pythonCmd) {
+    return new Promise((resolve, reject) => {
+        console.log('🐍 Iniciando servidor Flask con Python externo...');
         
-        possiblePaths.push(
-            path.join(appResourcesPath, 'app_simple.py'),
-            path.join(appResourcesPath, 'app_desktop.py'),
-            path.join(resourcesPath, 'app_simple.py'),
-            path.join(resourcesPath, 'app_desktop.py'),
-            path.join(__dirname, 'app_simple.py'),
-            path.join(__dirname, 'app_desktop.py'),
-            path.join(process.cwd(), 'app_simple.py'),
-            path.join(process.cwd(), 'app_desktop.py')
-        );
-    } else {
-        // En modo desarrollo
-        possiblePaths.push(
-            path.join(__dirname, 'app_simple.py'),
-            path.join(__dirname, 'app_desktop.py'),
-            path.join(process.cwd(), 'app_simple.py'),
-            path.join(process.cwd(), 'app_desktop.py')
-        );
-    }
-    
-    // Buscar el archivo en las ubicaciones posibles
-    let foundPath = null;
-    for (const testPath of possiblePaths) {
-        console.log('Verificando ruta:', testPath);
-        if (fs.existsSync(testPath)) {
-            foundPath = testPath;
-            console.log('Archivo encontrado en:', foundPath);
-            break;
-        }
-    }
-    
-    if (!foundPath) {
-        const error = new Error(`No se encontró archivo Python en ninguna de las ubicaciones: ${possiblePaths.join(', ')}`);
-        console.error(error.message);
-        dialog.showErrorBox(
-            'Archivo no encontrado',
-            `No se encontró el archivo Python del servidor.\nUbicaciones verificadas:\n${possiblePaths.join('\n')}`
-        );
-        reject(error);
-        return;
-    }
-    
-    appPath = foundPath;
-    workingDir = path.dirname(appPath);
-    
-    console.log('Ejecutando:', appPath);
-    console.log('Directorio de trabajo:', workingDir);
-    console.log('Puerto Flask:', FLASK_PORT);
-    console.log('Comando Python:', pythonCmd);
-    console.log('Sistema operativo:', process.platform);
-    
-    // Configurar opciones específicas para Windows
-    const spawnOptions = {
-        cwd: workingDir,
-        env: {
-            ...process.env,
-            PORT: FLASK_PORT.toString(),
-            PYTHONUNBUFFERED: '1'
-        }
-    };
-    
-    // En Windows, añadir configuraciones específicas
-    if (process.platform === 'win32') {
-        spawnOptions.shell = true;
-        spawnOptions.stdio = ['pipe', 'pipe', 'pipe'];
-    } else {
-        spawnOptions.stdio = 'inherit';
-    }
-    
-    flaskProcess = spawn(pythonCmd, [appPath], spawnOptions);
-    
-    // Capturar salida para debugging en Windows
-    if (process.platform === 'win32' && flaskProcess.stdout && flaskProcess.stderr) {
-        flaskProcess.stdout.on('data', (data) => {
-            console.log('Flask stdout:', data.toString());
-        });
+        // Verificar si Flask está instalado
+        const flaskCheck = spawn(pythonCmd, ['-c', 'import flask; print("Flask OK")'], { shell: true });
         
-        flaskProcess.stderr.on('data', (data) => {
-            console.error('Flask stderr:', data.toString());
-        });
-    }
-    
-    flaskProcess.on('error', (err) => {
-        console.error('Error al iniciar Flask:', err);
-        const errorMsg = `Error iniciando servidor Flask: ${err.message}`;
-        
-        // Mostrar error específico en Windows
-        if (process.platform === 'win32') {
-            dialog.showErrorBox(
-                'Error del servidor interno',
-                `No se pudo iniciar el servidor interno.\n\nDetalles técnicos:\n${errorMsg}\n\nAsegúrese de que Python esté instalado correctamente.`
-            );
-        }
-        
-        reject(err);
-    });
-    
-    flaskProcess.on('close', (code) => {
-        console.log('Flask process closed with code:', code);
-        if (code !== 0) {
-            const errorMsg = `El servidor Flask se cerró con código: ${code}`;
-            console.error(errorMsg);
-            
-            if (process.platform === 'win32') {
-                dialog.showErrorBox(
-                    'Error del servidor interno',
-                    `${errorMsg}\n\nPuede que falten dependencias de Python. La aplicación intentará instalarlas automáticamente en el próximo inicio.`
-                );
+        flaskCheck.on('close', (code) => {
+            if (code !== 0) {
+                reject(new Error('Flask no está instalado'));
+                return;
             }
-        }
+            
+            // Buscar archivo Python del servidor
+            const possiblePaths = [
+                path.join(__dirname, 'app_desktop.py'),
+                path.join(__dirname, 'app.py'),
+                path.join(__dirname, 'app_simple.py')
+            ];
+            
+            let foundPath = null;
+            for (const testPath of possiblePaths) {
+                if (fs.existsSync(testPath)) {
+                    foundPath = testPath;
+                    break;
+                }
+            }
+            
+            if (!foundPath) {
+                reject(new Error('No se encontró archivo Python del servidor'));
+                return;
+            }
+            
+            console.log(`Ejecutando Python server: ${foundPath}`);
+            
+            const flaskProcess = spawn(pythonCmd, [foundPath], {
+                cwd: __dirname,
+                env: {
+                    ...process.env,
+                    PORT: FLASK_PORT.toString()
+                },
+                stdio: 'inherit'
+            });
+            
+            flaskProcess.on('error', (error) => {
+                reject(error);
+            });
+            
+            // Esperar a que el servidor esté listo
+            setTimeout(() => {
+                console.log('✅ Servidor Python Flask iniciado');
+                resolve();
+            }, 3000);
+        });
     });
-    
-    // Esperar un momento para que el servidor se inicie
-    setTimeout(() => {
-        console.log('Flask debería estar listo ahora');
-        resolve();
-    }, 3000); // Aumentar a 3 segundos
 }

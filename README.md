@@ -39,14 +39,16 @@ SHW Reader is a **free, professional tool** for audio engineers and technicians 
 
 ## 🌟 Features
 
-- **📁 SHW File Support**: Native viewer for Wireless Workbench SHW files
+- **� Zero Dependencies**: Built-in Python server - no need to install Python separately
+- **�📁 SHW File Support**: Native viewer for Wireless Workbench SHW files
 - **🌍 Multi-language**: Support for 9 languages (Spanish, English, French, German, Italian, Portuguese, Catalan, Galician, Basque)
 - **📊 Export Options**: Export to CSV, Excel, Word, and PDF formats
 - **🎨 Modern UI**: Dark/Light theme support with professional design
 - **🖥️ Cross-platform**: Optimized for macOS and Windows with native UI elements
-- **⚡ Fast Performance**: Built with Electron and Flask for optimal performance
+- **⚡ Fast Performance**: Built with Electron and embedded Flask server for optimal performance
 - **✏️ Editable Tables**: Edit channel names and frequencies in real-time
 - **🔍 Advanced Selection**: Multiple selection modes with keyboard shortcuts
+- **🛡️ Robust Fallbacks**: Intelligent server detection with multiple backup options
 
 ## 🚀 Quick Start
 
@@ -72,9 +74,12 @@ SHW Reader is a **free, professional tool** for audio engineers and technicians 
 
 </div>
 
-### Prerequisites
-- **macOS**: macOS 10.14 or later, Python 3.8 or later
-- **Windows**: Windows 10 or later, Python 3.8 or later
+### ✅ **System Requirements**
+- **macOS**: macOS 10.14 or later
+- **Windows**: Windows 10 or later
+- **🚀 No Python installation required** - Built-in server included!
+
+> **Note**: SHW Reader now includes an embedded Python server, so you don't need to install Python separately. The application will work immediately after download and installation.
 
 **🔧 Having installation issues?** Check our [Troubleshooting Guide](TROUBLESHOOTING.md) for solutions to common Python installation problems.
 
