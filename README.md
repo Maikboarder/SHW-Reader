@@ -12,6 +12,7 @@
   [![GitHub release](https://img.shields.io/github/release/Maikboarder/SHW-Reader.svg)](https://github.com/Maikboarder/SHW-Reader/releases)
   [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
   [![macOS](https://img.shields.io/badge/platform-macOS-lightgrey.svg)](https://github.com/Maikboarder/SHW-Reader)
+  [![Windows](https://img.shields.io/badge/platform-Windows-blue.svg)](https://github.com/Maikboarder/SHW-Reader)
   
   **💖 Support the Project**
   
@@ -40,7 +41,7 @@ SHW Reader is a **free, professional tool** for audio engineers and technicians 
 - **🌍 Multi-language**: Support for 9 languages (Spanish, English, French, German, Italian, Portuguese, Catalan, Galician, Basque)
 - **📊 Export Options**: Export to CSV, Excel, Word, and PDF formats
 - **🎨 Modern UI**: Dark/Light theme support with professional design
-- **🖥️ Native macOS**: Optimized for macOS with native UI elements
+- **🖥️ Cross-platform**: Optimized for macOS and Windows with native UI elements
 - **⚡ Fast Performance**: Built with Electron and Flask for optimal performance
 - **✏️ Editable Tables**: Edit channel names and frequencies in real-time
 - **🔍 Advanced Selection**: Multiple selection modes with keyboard shortcuts
@@ -51,37 +52,51 @@ SHW Reader is a **free, professional tool** for audio engineers and technicians 
 
 <div align="center">
 
-**🍎 Choose your Mac type:**
+**🍎 macOS Downloads:**
 
 [![Download for Apple Silicon](https://img.shields.io/badge/Download%20for%20Apple%20Silicon-M1%2C%20M2%2C%20M3%20Macs-blue?style=for-the-badge&logo=apple)](https://github.com/Maikboarder/SHW-Reader/raw/main/dist/SHW%20Reader-1.0.0-arm64.dmg)
 
 [![Download for Intel Macs](https://img.shields.io/badge/Download%20for%20Intel%20Macs-Intel%20Processor-lightgrey?style=for-the-badge&logo=intel)](https://github.com/Maikboarder/SHW-Reader/raw/main/dist/SHW%20Reader-1.0.0.dmg)
 
-**❓ Not sure which Mac you have?**
-- **Apple Silicon** (M1, M2, M3): Most Macs from 2021 onwards
-- **Intel**: Most Macs from 2020 and earlier
-- Check: Apple Menu → About This Mac
+**🪟 Windows Downloads:**
+
+[![Download Windows Installer](https://img.shields.io/badge/Download%20Windows%20Installer-Setup%20.exe-blue?style=for-the-badge&logo=windows)](https://github.com/Maikboarder/SHW-Reader/raw/main/dist/SHW%20Reader%20Setup%201.0.0.exe)
+
+[![Download Windows Portable](https://img.shields.io/badge/Download%20Windows%20Portable-Portable%20.exe-green?style=for-the-badge&logo=windows)](https://github.com/Maikboarder/SHW-Reader/raw/main/dist/SHW%20Reader%201.0.0.exe)
+
+**❓ Which version to choose?**
+- **macOS**: Apple Silicon (M1/M2/M3) or Intel based on your Mac
+- **Windows**: Installer for system-wide installation, Portable for no-install usage
 
 </div>
 
 ### Prerequisites
-- macOS 10.14 or later
-- Python 3.8 or later
+- **macOS**: macOS 10.14 or later, Python 3.8 or later
+- **Windows**: Windows 10 or later, Python 3.8 or later
 
 ### Installation
 
+#### macOS
 1. **Download the DMG** using the buttons above
 2. **Open the downloaded DMG file**
 3. **Drag SHW Reader to Applications folder**
 4. **Launch** SHW Reader from Applications
 5. **Allow permissions** if macOS asks (it's safe!)
 
+#### Windows
+1. **Download the installer or portable version** using the buttons above
+2. **For Installer**: Run the downloaded `.exe` and follow setup wizard
+3. **For Portable**: Extract and run the `.exe` directly (no installation needed)
+4. **Allow Windows Defender** if it asks (it's safe!)
+
 ### Alternative: GitHub Releases
 
 1. **Browse all releases** at [Releases](https://github.com/Maikboarder/SHW-Reader/releases) page
 2. **Download the appropriate file**:
-   - For Apple Silicon Macs: `SHW Reader-1.0.0-arm64.dmg`
-   - For Intel Macs: `SHW Reader-1.0.0.dmg`
+   - **macOS Apple Silicon**: `SHW Reader-1.0.0-arm64.dmg`
+   - **macOS Intel**: `SHW Reader-1.0.0.dmg`
+   - **Windows Installer**: `SHW Reader Setup 1.0.0.exe`
+   - **Windows Portable**: `SHW Reader 1.0.0.exe`
 
 ### Development Setup
 
@@ -110,16 +125,21 @@ npm start
 
 ## 🛠️ Building from Source
 
-### Build for macOS
+### Build for macOS and Windows
 
 ```bash
-# Build for current architecture
+# Build for macOS current architecture
 npm run build:mac
 
-# Build for specific architecture
+# Build for specific macOS architecture
 npm run build:mac-intel    # Intel Macs
 npm run build:mac-silicon  # Apple Silicon
 npm run build:mac-universal # Universal binary
+
+# Build for Windows
+npm run build:win          # All Windows targets
+npm run build:win-x64      # Windows 64-bit
+npm run build:win-ia32     # Windows 32-bit
 ```
 
 See [BUILD_GUIDE.md](BUILD_GUIDE.md) for detailed building instructions.
@@ -226,12 +246,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Solution**: Install Python from [python.org](https://www.python.org/downloads/macos/)
 
 **Q: "Which version should I download?"**
-- **M1/M2/M3 Mac**: Download Apple Silicon version
-- **Intel Mac**: Download Intel version
-- **Check**: Apple Menu → About This Mac
+- **macOS**: M1/M2/M3 Mac → Apple Silicon version, Intel Mac → Intel version
+- **Windows**: Most users → Windows Installer, Advanced users → Portable version
+- **Check macOS type**: Apple Menu → About This Mac
 
 **Q: App won't start or crashes**
-- **Solution**: Try the other version (Intel/Silicon) or contact support
+- **macOS**: Try the other version (Intel/Silicon) or contact support
+- **Windows**: Run as administrator, or try compatibility mode for Windows 10
 
 ---
 
