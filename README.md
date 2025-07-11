@@ -39,23 +39,16 @@ SHW Reader is a **free, professional tool** for audio engineers and technicians 
 
 ## 🌟 Features
 
-- **� Zero Dependencies**: Built-in Python server - no need to install Python separately
-- **�📁 SHW File Support**: Native viewer for Wireless Workbench SHW files
 - **🌍 Multi-language**: Support for 9 languages (Spanish, English, French, German, Italian, Portuguese, Catalan, Galician, Basque)
 - **📊 Export Options**: Export to CSV, Excel, Word, and PDF formats
 - **🎨 Modern UI**: Dark/Light theme support with professional design
 - **🖥️ Cross-platform**: Optimized for macOS and Windows with native UI elements
-- **⚡ Fast Performance**: Built with Electron and embedded Flask server for optimal performance
-- **✏️ Editable Tables**: Edit channel names and frequencies in real-time
-- **🔍 Advanced Selection**: Multiple selection modes with keyboard shortcuts
-- **🛡️ Robust Fallbacks**: Intelligent server detection with multiple backup options
+- **✏️ Editable Tables**: Edit channel names and frequencies
 
 ## 🚀 Quick Start
 
 ### 📥 **Direct Downloads** (Recommended for most users)
 
-> **🎉 NEW v1.0.1**: Now with **embedded backend** - no Python installation required!
-> 
 > **📝 Note**: Links below will work after v1.0.1 release is published!
 
 <div align="center">
@@ -86,8 +79,6 @@ SHW Reader is a **free, professional tool** for audio engineers and technicians 
 - **macOS**: macOS 10.14 or later
 - **Windows**: Windows 10 or later
 - **🚀 No Python installation required** - Built-in server included!
-
-> **Note**: SHW Reader v1.0.1 includes an embedded Python server, so you don't need to install Python separately. The application will work immediately after download and installation.
 
 **🔧 Having installation issues?** Check our [Troubleshooting Guide](TROUBLESHOOTING.md) for solutions to common Python installation problems.
 
@@ -281,7 +272,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
   <strong>SHW Reader v1.0.0</strong><br>
-  Created with ❤️ by <strong>Miguel Fuentes Rodriguez</strong><br>
+  Created by <strong>Miguel Fuentes Rodriguez</strong><br>
   <em>For the audio professional community</em>
   
   <br><br>
