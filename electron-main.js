@@ -25,110 +25,10 @@ function getAppName() {
     }
 }
 
-// Función para verificar si Python está disponible
-function checkPython() {
-    return new Promise((resolve) => {
-        console.log('Verificando disponibilidad de Python...');
-        
-        // Primero intentar con python3
-        const python3 = spawn('python3', ['--version'], { shell: true });
-        python3.on('error', () => {
-            console.log('python3 no encontrado, intentando con python...');
-            
-            // Intentar con 'python' si 'python3' no funciona
-            const python = spawn('python', ['--version'], { shell: true });
-            python.on('error', () => {
-                console.log('❌ Python no encontrado en el sistema');
-                resolve(false);
-            });
-            python.on('close', (code) => {
-                if (code === 0) {
-                    console.log('✅ Python encontrado como "python"');
-                    resolve('python');
-                } else {
-                    console.log('❌ Error ejecutando python');
-                    resolve(false);
-                }
-            });
-        });
-        python3.on('close', (code) => {
-            if (code === 0) {
-                console.log('✅ Python encontrado como "python3"');
-                resolve('python3');
-            } else {
-                console.log('❌ Error ejecutando python3');
-                resolve(false);
-            }
-        });
-    });
-}
+// TODAS LAS FUNCIONES DE PYTHON EXTERNO REMOVIDAS
+// La aplicación ahora SOLO usa el backend embebido o fallback Node.js
 
-// Función para instalar Flask automáticamente
-function installFlask(pythonCmd) {
-    return new Promise((resolve, reject) => {
-        console.log('🔄 Intentando instalar Flask y dependencias...');
-        
-        // Verificar si pip está disponible
-        const pipCheck = spawn(pythonCmd, ['-m', 'pip', '--version'], { shell: true });
-        
-        pipCheck.on('error', (error) => {
-            console.error('❌ pip no está disponible:', error);
-            reject(new Error('pip no está disponible. Instale Python con pip incluido.'));
-            return;
-        });
-        
-        pipCheck.on('close', (code) => {
-            if (code !== 0) {
-                console.error('❌ pip no está disponible (código:', code, ')');
-                reject(new Error('pip no está disponible. Reinstale Python con pip incluido.'));
-                return;
-            }
-            
-            console.log('✅ pip disponible, instalando Flask...');
-            
-            // Intentar instalar Flask con pip
-            const pip = spawn(pythonCmd, ['-m', 'pip', 'install', '--user', 'flask', 'openpyxl', 'python-docx', 'reportlab'], { 
-                shell: true,
-                stdio: ['pipe', 'pipe', 'pipe']
-            });
-            
-            let stdout = '';
-            let stderr = '';
-            
-            if (pip.stdout) {
-                pip.stdout.on('data', (data) => {
-                    stdout += data.toString();
-                    console.log('pip stdout:', data.toString().trim());
-                });
-            }
-            
-            if (pip.stderr) {
-                pip.stderr.on('data', (data) => {
-                    stderr += data.toString();
-                    console.error('pip stderr:', data.toString().trim());
-                });
-            }
-            
-            pip.on('error', (error) => {
-                console.error('❌ Error instalando Flask:', error);
-                reject(new Error(`Error instalando Flask: ${error.message}`));
-            });
-            
-            pip.on('close', (code) => {
-                if (code === 0) {
-                    console.log('✅ Flask instalado exitosamente');
-                    resolve(true);
-                } else {
-                    console.error('❌ Error instalando Flask, código:', code);
-                    console.error('❌ stderr:', stderr);
-                    reject(new Error(`Error instalando Flask (código ${code}): ${stderr || 'Error desconocido'}`));
-                }
-            });
-        });
-    });
-}
-
-// Función para verificar si Flask está disponible
+// Función para verificar si Flask embebido está disponible
 function checkFlaskReady() {
     return new Promise((resolve) => {
         const checkServer = () => {
@@ -162,28 +62,29 @@ async function startFlaskServer() {
     try {
         await flaskServer.start();
         console.log('✅ Servidor embebido iniciado exitosamente');
-        // Mostrar mensaje de éxito al usuario
-        setTimeout(() => {
-            if (mainWindow) {
-                dialog.showMessageBox(mainWindow, {
-                    type: 'info',
-                    title: '🚀 Servidor interno activo',
-                    message: 'SHW Reader funcionando perfectamente',
-                    detail: `✅ Estado: Servidor Flask embebido funcionando
+        // Mostrar mensaje de éxito al usuario (solo en desarrollo)
+        if (process.env.NODE_ENV === 'development') {
+            setTimeout(() => {
+                if (mainWindow) {
+                    dialog.showMessageBox(mainWindow, {
+                        type: 'info',
+                        title: '🚀 SHW Reader listo',
+                        message: 'Aplicación funcionando correctamente',
+                        detail: `✅ Backend embebido activo
 
-🔧 Características disponibles:
+🔧 Funciones disponibles:
 ✅ Procesamiento completo de archivos SHW
 ✅ Exportación a CSV, Excel, Word y PDF
-✅ Interfaz de usuario completa
-✅ Sin dependencias externas
+✅ Interfaz completa sin dependencias
 ✅ Funcionamiento inmediato
 
-🎉 ¡Todo listo para usar!`,
-                    buttons: ['Perfecto'],
-                    defaultId: 0
-                });
-            }
-        }, 3000);
+🎉 ¡Listo para usar!`,
+                        buttons: ['Perfecto'],
+                        defaultId: 0
+                    });
+                }
+            }, 3000);
+        }
         return Promise.resolve();
     } catch (error) {
         console.error('❌ Error con servidor embebido:', error.message);
@@ -192,26 +93,27 @@ async function startFlaskServer() {
         try {
             await createFallbackServer(FLASK_PORT);
             console.log('✅ Servidor de emergencia iniciado');
+            // Solo mostrar mensaje en caso de que realmente falle el embebido
             setTimeout(() => {
                 if (mainWindow) {
                     dialog.showMessageBox(mainWindow, {
                         type: 'warning',
-                        title: 'Modo de emergencia',
-                        message: 'Funcionamiento con limitaciones',
-                        detail: `⚠️ Estado: Servidor de emergencia activo
+                        title: 'Modo básico activo',
+                        message: 'SHW Reader funcionando con limitaciones',
+                        detail: `⚠️ El backend completo no está disponible
 
-🔧 Características disponibles:
-✅ Interfaz de usuario básica
-✅ Visualización de archivos SHW
-❌ Exportación completa
+🔧 Funciones disponibles:
+✅ Interfaz de usuario
+✅ Visualización básica de archivos SHW
+❌ Exportación completa (CSV, Excel, Word, PDF)
 ❌ Procesamiento avanzado
 
-💡 Para funcionalidad completa, contacte con soporte técnico.`,
+💡 Reinicie la aplicación para reintentar el modo completo.`,
                         buttons: ['Continuar'],
                         defaultId: 0
                     });
                 }
-            }, 3000);
+            }, 2000);
             return Promise.resolve();
         } catch (fallbackError) {
             console.error('❌ Error crítico - todos los servidores fallaron');
@@ -227,44 +129,8 @@ async function startFlaskServer() {
     }
 }
 
-// Funciones obsoletas removidas - ahora usamos EmbeddedFlaskServer
-
-// Función para mostrar error de instalación de Python
-function showPythonInstallationError(errorDetails = '') {
-    setTimeout(() => {
-        if (mainWindow) {
-            dialog.showMessageBox(mainWindow, {
-                type: 'error',
-                title: 'Error instalando Python',
-                message: 'No se pudo instalar Flask automáticamente',
-                detail: `${errorDetails ? 'Error: ' + errorDetails + '\n\n' : ''}Para usar todas las funciones de SHW Reader, instale Python manualmente:
-
-1. Descargue Python desde python.org
-2. Durante la instalación, marque "Add Python to PATH"
-3. Abra una terminal y ejecute: pip install flask openpyxl python-docx reportlab
-4. Reinicie SHW Reader
-
-Mientras tanto, puede usar la funcionalidad básica con el servidor de emergencia.`,
-                buttons: ['Usar Modo Básico', 'Descargar Python', 'Ver Tutorial'],
-                defaultId: 0
-            }).then((result) => {
-                if (result.response === 1) {
-                    shell.openExternal('https://www.python.org/downloads/');
-                } else if (result.response === 2) {
-                    shell.openExternal('https://github.com/Maikboarder/SHW-Reader#installation');
-                }
-                
-                // Si el usuario elige modo básico, iniciar servidor de fallback
-                if (result.response === 0) {
-                    createFallbackServer(FLASK_PORT).catch((error) => {
-                        console.error('Error iniciando servidor de fallback:', error);
-                        app.quit();
-                    });
-                }
-            });
-        }
-    }, 1000);
-}
+// TODAS LAS FUNCIONES OBSOLETAS DE PYTHON REMOVIDAS
+// La aplicación funciona SOLO con backend embebido + fallback Node.js
 
 // Función para crear la ventana principal
 async function createMainWindow() {
@@ -921,62 +787,4 @@ app.on('web-contents-created', (event, contents) => {
     });
 });
 
-// Función startFlaskServerInternal removida - lógica integrada en startPythonFlaskServer
-
-// Función para iniciar servidor Flask con Python externo (fallback)
-async function startPythonFlaskServer(pythonCmd) {
-    return new Promise((resolve, reject) => {
-        console.log('🐍 Iniciando servidor Flask con Python externo...');
-        
-        // Verificar si Flask está instalado
-        const flaskCheck = spawn(pythonCmd, ['-c', 'import flask; print("Flask OK")'], { shell: true });
-        
-        flaskCheck.on('close', (code) => {
-            if (code !== 0) {
-                reject(new Error('Flask no está instalado'));
-                return;
-            }
-            
-            // Buscar archivo Python del servidor
-            const possiblePaths = [
-                path.join(__dirname, 'app_desktop.py'),
-                path.join(__dirname, 'app.py'),
-                path.join(__dirname, 'app_simple.py')
-            ];
-            
-            let foundPath = null;
-            for (const testPath of possiblePaths) {
-                if (fs.existsSync(testPath)) {
-                    foundPath = testPath;
-                    break;
-                }
-            }
-            
-            if (!foundPath) {
-                reject(new Error('No se encontró archivo Python del servidor'));
-                return;
-            }
-            
-            console.log(`Ejecutando Python server: ${foundPath}`);
-            
-            const flaskProcess = spawn(pythonCmd, [foundPath], {
-                cwd: __dirname,
-                env: {
-                    ...process.env,
-                    PORT: FLASK_PORT.toString()
-                },
-                stdio: 'inherit'
-            });
-            
-            flaskProcess.on('error', (error) => {
-                reject(error);
-            });
-            
-            // Esperar a que el servidor esté listo
-            setTimeout(() => {
-                console.log('✅ Servidor Python Flask iniciado');
-                resolve();
-            }, 3000);
-        });
-    });
-}
+// ARCHIVO COMPLETAMENTE LIMPIO - SOLO BACKEND EMBEBIDO
