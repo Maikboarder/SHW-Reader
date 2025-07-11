@@ -55,20 +55,22 @@ SHW Reader is a **free, professional tool** for audio engineers and technicians 
 ### 📥 **Direct Downloads** (Recommended for most users)
 
 > **🎉 NEW v1.0.0**: Now with **embedded backend** - no Python installation required!
+> 
+> **📝 Note**: Links below are temporary direct downloads. Full release coming soon!
 
 <div align="center">
 
 **🍎 macOS Downloads:**
 
-[![Download for Apple Silicon](https://img.shields.io/badge/Download%20for%20Apple%20Silicon-M1%2C%20M2%2C%20M3%20Macs-blue?style=for-the-badge&logo=apple)](https://github.com/Maikboarder/SHW-Reader/releases/download/v1.0.0/SHW%20Reader-1.0.0-arm64.dmg)
+[![Download for Apple Silicon](https://img.shields.io/badge/Download%20for%20Apple%20Silicon-M1%2C%20M2%2C%20M3%20Macs-blue?style=for-the-badge&logo=apple)](https://github.com/Maikboarder/SHW-Reader/raw/main/dist/SHW%20Reader-1.0.0-arm64.dmg)
 
-[![Download for Intel Macs](https://img.shields.io/badge/Download%20for%20Intel%20Macs-Intel%20Processor-lightgrey?style=for-the-badge&logo=intel)](https://github.com/Maikboarder/SHW-Reader/releases/download/v1.0.0/SHW%20Reader-1.0.0.dmg)
+[![Download for Intel Macs](https://img.shields.io/badge/Download%20for%20Intel%20Macs-Intel%20Processor-lightgrey?style=for-the-badge&logo=intel)](https://github.com/Maikboarder/SHW-Reader/raw/main/dist/SHW%20Reader-1.0.0.dmg)
 
 **🪟 Windows Downloads:**
 
-[![Download Windows Installer](https://img.shields.io/badge/Download%20Windows%20Installer-Setup%20.exe-blue?style=for-the-badge&logo=windows)](https://github.com/Maikboarder/SHW-Reader/releases/download/v1.0.0/SHW%20Reader%20Setup%201.0.0.exe)
+[![Download Windows Installer](https://img.shields.io/badge/Download%20Windows%20Installer-Setup%20.exe-blue?style=for-the-badge&logo=windows)](https://github.com/Maikboarder/SHW-Reader/raw/main/dist/SHW%20Reader%20Setup%201.0.0.exe)
 
-[![Download Windows Portable](https://img.shields.io/badge/Download%20Windows%20Portable-Portable%20.exe-green?style=for-the-badge&logo=windows)](https://github.com/Maikboarder/SHW-Reader/releases/download/v1.0.0/SHW%20Reader%201.0.0.exe)
+[![Download Windows Portable](https://img.shields.io/badge/Download%20Windows%20Portable-Portable%20.exe-green?style=for-the-badge&logo=windows)](https://github.com/Maikboarder/SHW-Reader/raw/main/dist/SHW%20Reader%201.0.0.exe)
 
 **❓ Which version to choose?**
 - **macOS**: Apple Silicon (M1/M2/M3) or Intel based on your Mac
