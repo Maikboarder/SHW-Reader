@@ -260,7 +260,7 @@ function createMenu() {
                         dialog.showMessageBox(mainWindow, {
                             type: 'info',
                             title: getMenuTranslation('menu.about'),
-                            message: `${getAppName()} v1.0.0`,
+                            message: `${getAppName()} v1.0.1`,
                             detail: getMenuTranslation('about.description'),
                             icon: path.join(__dirname, 'assets', 'mac', 'SHW Reader', 'icon.iconset', 'icon_128x128.png')
                         });

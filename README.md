@@ -54,29 +54,31 @@ SHW Reader is a **free, professional tool** for audio engineers and technicians 
 
 ### 📥 **Direct Downloads** (Recommended for most users)
 
-> **🎉 NEW v1.0.0**: Now with **embedded backend** - no Python installation required!
+> **🎉 NEW v1.0.1**: Now with **embedded backend** - no Python installation required!
 > 
-> **📝 Note**: Links below are temporary direct downloads. Full release coming soon!
+> **📝 Note**: Links below will work after v1.0.1 release is published!
 
 <div align="center">
 
 **🍎 macOS Downloads:**
 
-[![Download for Apple Silicon](https://img.shields.io/badge/Download%20for%20Apple%20Silicon-M1%2C%20M2%2C%20M3%20Macs-blue?style=for-the-badge&logo=apple)](https://github.com/Maikboarder/SHW-Reader/raw/main/dist/SHW%20Reader-1.0.0-arm64.dmg)
+[![Download for Apple Silicon](https://img.shields.io/badge/Download%20for%20Apple%20Silicon-M1%2C%20M2%2C%20M3%20Macs-blue?style=for-the-badge&logo=apple)](https://github.com/Maikboarder/SHW-Reader/releases/download/v1.0.1/SHW%20Reader-1.0.1-arm64.dmg)
 
-[![Download for Intel Macs](https://img.shields.io/badge/Download%20for%20Intel%20Macs-Intel%20Processor-lightgrey?style=for-the-badge&logo=intel)](https://github.com/Maikboarder/SHW-Reader/raw/main/dist/SHW%20Reader-1.0.0.dmg)
+[![Download for Intel Macs](https://img.shields.io/badge/Download%20for%20Intel%20Macs-Intel%20Processor-lightgrey?style=for-the-badge&logo=intel)](https://github.com/Maikboarder/SHW-Reader/releases/download/v1.0.1/SHW%20Reader-1.0.1.dmg)
 
 **🪟 Windows Downloads:**
 
-[![Download Windows Installer](https://img.shields.io/badge/Download%20Windows%20Installer-Setup%20.exe-blue?style=for-the-badge&logo=windows)](https://github.com/Maikboarder/SHW-Reader/raw/main/dist/SHW%20Reader%20Setup%201.0.0.exe)
+[![Download Windows Installer](https://img.shields.io/badge/Download%20Windows%20Installer-Setup%20.exe-blue?style=for-the-badge&logo=windows)](https://github.com/Maikboarder/SHW-Reader/releases/download/v1.0.1/SHW%20Reader%20Setup%201.0.1.exe)
 
-[![Download Windows Portable](https://img.shields.io/badge/Download%20Windows%20Portable-Portable%20.exe-green?style=for-the-badge&logo=windows)](https://github.com/Maikboarder/SHW-Reader/raw/main/dist/SHW%20Reader%201.0.0.exe)
+[![Download Windows Portable](https://img.shields.io/badge/Download%20Windows%20Portable-Portable%20.exe-green?style=for-the-badge&logo=windows)](https://github.com/Maikboarder/SHW-Reader/releases/download/v1.0.1/SHW%20Reader%201.0.1.exe)
 
 **❓ Which version to choose?**
 - **macOS**: Apple Silicon (M1/M2/M3) or Intel based on your Mac
 - **Windows**: Installer for system-wide installation, Portable for no-install usage
 
 **🔗 All Releases**: [View all versions and download options](https://github.com/Maikboarder/SHW-Reader/releases)
+
+> **🔥 Latest: v1.0.1** - Final stable version with completely clean code and embedded backend!
 
 </div>
 
@@ -85,7 +87,7 @@ SHW Reader is a **free, professional tool** for audio engineers and technicians 
 - **Windows**: Windows 10 or later
 - **🚀 No Python installation required** - Built-in server included!
 
-> **Note**: SHW Reader now includes an embedded Python server, so you don't need to install Python separately. The application will work immediately after download and installation.
+> **Note**: SHW Reader v1.0.1 includes an embedded Python server, so you don't need to install Python separately. The application will work immediately after download and installation.
 
 **🔧 Having installation issues?** Check our [Troubleshooting Guide](TROUBLESHOOTING.md) for solutions to common Python installation problems.
 
