@@ -10,11 +10,17 @@
     "build:mac-intel": "electron-builder --mac --x64",
     "build:mac-silicon": "electron-builder --mac --arm64",
     "build:mac-universal": "electron-builder --mac --universal",
+    "build:win": "electron-builder --win",
+    "build:win-x64": "electron-builder --win --x64",
+    "build:win-ia32": "electron-builder --win --ia32",
     "dist": "electron-builder --publish=never",
     "dist:mac": "electron-builder --mac --publish=never",
     "dist:mac-intel": "electron-builder --mac --x64 --publish=never",
     "dist:mac-silicon": "electron-builder --mac --arm64 --publish=never",
     "dist:mac-universal": "electron-builder --mac --universal --publish=never",
+    "dist:win": "electron-builder --win --publish=never",
+    "dist:win-x64": "electron-builder --win --x64 --publish=never",
+    "dist:win-ia32": "electron-builder --win --ia32 --publish=never",
     "pack": "electron-builder --dir"
   },
   "keywords": [
@@ -122,6 +128,36 @@
         "height": 380
       },
       "backgroundColor": "#1a1a1a"
+    },
+    "win": {
+      "icon": "assets/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "publisherName": "Miguel Fuentes Rodriguez",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "SHW Reader"
     }
   }
 }

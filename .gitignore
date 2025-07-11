@@ -8,6 +8,8 @@ yarn-error.log*
 dist/
 !dist/*.dmg
 !dist/*.dmg.blockmap
+!dist/*.exe
+!dist/*.exe.blockmap
 build/
 out/
 
