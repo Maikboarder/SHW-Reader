@@ -53,9 +53,9 @@ SHW Reader is a **free, professional tool** for audio engineers and technicians 
 
 **🍎 Choose your Mac type:**
 
-[![Download for Apple Silicon](https://img.shields.io/badge/Download%20for%20Apple%20Silicon-M1%2C%20M2%2C%20M3%20Macs-blue?style=for-the-badge&logo=apple)](https://github.com/Maikboarder/SHW-Reader/releases/latest/download/SHW-Reader-macOS-arm64.dmg)
+[![Download for Apple Silicon](https://img.shields.io/badge/Download%20for%20Apple%20Silicon-M1%2C%20M2%2C%20M3%20Macs-blue?style=for-the-badge&logo=apple)](https://github.com/Maikboarder/SHW-Reader/raw/main/dist/SHW%20Reader-1.0.0-arm64.dmg)
 
-[![Download for Intel Macs](https://img.shields.io/badge/Download%20for%20Intel%20Macs-Intel%20Processor-lightgrey?style=for-the-badge&logo=intel)](https://github.com/Maikboarder/SHW-Reader/releases/latest/download/SHW-Reader-macOS-x64.dmg)
+[![Download for Intel Macs](https://img.shields.io/badge/Download%20for%20Intel%20Macs-Intel%20Processor-lightgrey?style=for-the-badge&logo=intel)](https://github.com/Maikboarder/SHW-Reader/raw/main/dist/SHW%20Reader-1.0.0.dmg)
 
 **❓ Not sure which Mac you have?**
 - **Apple Silicon** (M1, M2, M3): Most Macs from 2021 onwards
@@ -80,8 +80,8 @@ SHW Reader is a **free, professional tool** for audio engineers and technicians 
 
 1. **Browse all releases** at [Releases](https://github.com/Maikboarder/SHW-Reader/releases) page
 2. **Download the appropriate file**:
-   - For Apple Silicon Macs: `SHW-Reader-macOS-arm64.dmg`
-   - For Intel Macs: `SHW-Reader-macOS-x64.dmg`
+   - For Apple Silicon Macs: `SHW Reader-1.0.0-arm64.dmg`
+   - For Intel Macs: `SHW Reader-1.0.0.dmg`
 
 ### Development Setup
 
