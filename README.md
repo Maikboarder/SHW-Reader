@@ -7,6 +7,8 @@
   
   *A multi-language Electron application for viewing and exporting Wireless Workbench SHW files*
   
+  **Especialmente dirigida a Coordinadores de RF, ingenieros de sonido y técnicos que gestionan espectro inalámbrico profesional.**
+  
   **Created by Miguel Fuentes Rodriguez ([@Maikboarder](https://github.com/Maikboarder))**
   
   [![GitHub release](https://img.shields.io/github/release/Maikboarder/SHW-Reader.svg)](https://github.com/Maikboarder/SHW-Reader/releases)

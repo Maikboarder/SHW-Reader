@@ -37,6 +37,29 @@ function checkPython() {
     });
 }
 
+// Función para instalar Flask automáticamente
+function installFlask(pythonCmd) {
+    return new Promise((resolve, reject) => {
+        console.log('Instalando Flask automáticamente...');
+        const pip = spawn(pythonCmd, ['-m', 'pip', 'install', 'flask', 'openpyxl', 'python-docx', 'reportlab']);
+        
+        pip.on('error', (error) => {
+            console.error('Error instalando Flask:', error);
+            reject(error);
+        });
+        
+        pip.on('close', (code) => {
+            if (code === 0) {
+                console.log('Flask instalado exitosamente');
+                resolve(true);
+            } else {
+                console.error('Error instalando Flask, código:', code);
+                reject(new Error(`Error instalando Flask, código: ${code}`));
+            }
+        });
+    });
+}
+
 // Función para verificar si Flask está disponible
 function checkFlaskReady() {
     return new Promise((resolve) => {
@@ -84,11 +107,102 @@ async function startFlaskServer() {
         
         flaskCheck.on('close', (code) => {
             if (code !== 0) {
-                dialog.showErrorBox(
-                    'Flask no encontrado',
-                    'Esta aplicación requiere Flask. Instálalo con: pip3 install flask'
-                );
-                app.quit();
+                // Intentar instalar Flask automáticamente
+                installFlask(pythonCmd).then(() => {
+                    // Verificar nuevamente si Flask está disponible después de la instalación
+                    const flaskCheckPostInstall = spawn(pythonCmd, ['-c', 'import flask; print("Flask OK")']);
+                    
+                    flaskCheckPostInstall.on('error', () => {
+                        reject('Error al verificar Flask después de la instalación');
+                    });
+                    
+                    flaskCheckPostInstall.on('close', (code) => {
+                        if (code !== 0) {
+                            dialog.showErrorBox(
+                                'Flask no encontrado',
+                                'Esta aplicación requiere Flask. Instálalo con: pip3 install flask'
+                            );
+                            app.quit();
+                            return;
+                        }
+                        
+                        // Iniciar el servidor Flask
+                        // Determinar la ruta correcta del archivo Python
+                        let appPath;
+                        let workingDir;
+                        
+                        // Lista de posibles ubicaciones para el archivo Python
+                        const possiblePaths = [];
+                        
+                        if (app.isPackaged) {
+                            // En modo empaquetado, intentar varias ubicaciones posibles
+                            const resourcesPath = process.resourcesPath;
+                            const appResourcesPath = path.join(resourcesPath, 'app');
+                            
+                            possiblePaths.push(
+                                path.join(appResourcesPath, 'app_desktop.py'),
+                                path.join(resourcesPath, 'app_desktop.py'),
+                                path.join(__dirname, 'app_desktop.py'),
+                                path.join(process.cwd(), 'app_desktop.py')
+                            );
+                        } else {
+                            // En modo desarrollo
+                            possiblePaths.push(
+                                path.join(__dirname, 'app_desktop.py'),
+                                path.join(process.cwd(), 'app_desktop.py')
+                            );
+                        }
+                        
+                        // Buscar el archivo en las ubicaciones posibles
+                        let foundPath = null;
+                        for (const testPath of possiblePaths) {
+                            console.log('Verificando ruta:', testPath);
+                            if (fs.existsSync(testPath)) {
+                                foundPath = testPath;
+                                console.log('Archivo encontrado en:', foundPath);
+                                break;
+                            }
+                        }
+                        
+                        if (!foundPath) {
+                            const error = new Error(`No se encontró app_desktop.py en ninguna de las ubicaciones: ${possiblePaths.join(', ')}`);
+                            console.error(error.message);
+                            dialog.showErrorBox(
+                                'Archivo no encontrado',
+                                `No se encontró el archivo app_desktop.py.\nUbicaciones verificadas:\n${possiblePaths.join('\n')}`
+                            );
+                            reject(error);
+                            return;
+                        }
+                        
+                        appPath = foundPath;
+                        workingDir = path.dirname(appPath);
+                        
+                        console.log('Ejecutando:', appPath);
+                        console.log('Directorio de trabajo:', workingDir);
+                        console.log('Puerto Flask:', FLASK_PORT);
+                        
+                        flaskProcess = spawn(pythonCmd, [appPath], {
+                            cwd: workingDir,
+                            stdio: 'inherit',
+                            env: {
+                                ...process.env,
+                                PORT: FLASK_PORT.toString()
+                            }
+                        });
+                        
+                        flaskProcess.on('error', (err) => {
+                            console.error('Error al iniciar Flask:', err);
+                            reject(err);
+                        });
+                        
+                        // Esperar un momento para que el servidor se inicie
+                        setTimeout(() => {
+                            console.log('Flask debería estar listo ahora');
+                            resolve();
+                        }, 3000); // Aumentar a 3 segundos
+                    });
+                }).catch(reject);
                 return;
             }
             
