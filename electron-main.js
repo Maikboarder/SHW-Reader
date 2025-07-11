@@ -162,7 +162,6 @@ async function startFlaskServer() {
     try {
         await flaskServer.start();
         console.log('✅ Servidor embebido iniciado exitosamente');
-        
         // Mostrar mensaje de éxito al usuario
         setTimeout(() => {
             if (mainWindow) {
@@ -185,31 +184,14 @@ async function startFlaskServer() {
                 });
             }
         }, 3000);
-        
         return Promise.resolve();
-        
     } catch (error) {
         console.error('❌ Error con servidor embebido:', error.message);
-        console.log('⚠️ Intentando alternativas...');
-        
-        // Fallback 1: Python externo
-        const pythonCmd = await checkPython();
-        if (pythonCmd) {
-            console.log('🔄 Usando Python externo como fallback...');
-            try {
-                await startPythonFlaskServer(pythonCmd);
-                return Promise.resolve();
-            } catch (pythonError) {
-                console.error('❌ Error con Python externo:', pythonError.message);
-            }
-        }
-        
-        // Fallback 2: Servidor Node.js básico
+        // NO intentar Python externo, solo fallback Node.js básico
         console.log('🔄 Usando servidor de emergencia...');
         try {
             await createFallbackServer(FLASK_PORT);
             console.log('✅ Servidor de emergencia iniciado');
-            
             setTimeout(() => {
                 if (mainWindow) {
                     dialog.showMessageBox(mainWindow, {
@@ -224,35 +206,21 @@ async function startFlaskServer() {
 ❌ Exportación completa
 ❌ Procesamiento avanzado
 
-💡 Para funcionalidad completa, instale Python desde python.org`,
-                        buttons: ['Continuar', 'Descargar Python'],
+💡 Para funcionalidad completa, contacte con soporte técnico.`,
+                        buttons: ['Continuar'],
                         defaultId: 0
-                    }).then((result) => {
-                        if (result.response === 1) {
-                            shell.openExternal('https://www.python.org/downloads/');
-                        }
                     });
                 }
             }, 3000);
-            
             return Promise.resolve();
         } catch (fallbackError) {
             console.error('❌ Error crítico - todos los servidores fallaron');
-            
             if (mainWindow) {
                 dialog.showErrorBox(
                     'Error crítico',
-                    `No se pudo iniciar ningún servidor.
-
-Errores:
-- Servidor embebido: ${error.message}
-- Python externo: ${pythonCmd ? 'Error de Flask' : 'No encontrado'}
-- Servidor emergencia: ${fallbackError.message}
-
-La aplicación se cerrará.`
+                    `No se pudo iniciar ningún servidor.\n\nErrores:\n- Servidor embebido: ${error.message}\n- Servidor emergencia: ${fallbackError.message}\n\nLa aplicación se cerrará.`
                 );
             }
-            
             app.quit();
             return Promise.reject(new Error('Fallo crítico de todos los servidores'));
         }
