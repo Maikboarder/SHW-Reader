@@ -359,32 +359,6 @@ function createMenu() {
                     }
                 },
                 {
-                    label: getMenuTranslation('menu.export_excel'),
-                    accelerator: 'CmdOrCtrl+Shift+E',
-                    click: () => {
-                        mainWindow.webContents.executeJavaScript(`
-                            if (typeof exportData === 'function') {
-                                exportData('excel');
-                            } else {
-                                console.log('Función exportData no encontrada');
-                            }
-                        `);
-                    }
-                },
-                {
-                    label: getMenuTranslation('menu.export_word'),
-                    accelerator: 'CmdOrCtrl+Shift+W',
-                    click: () => {
-                        mainWindow.webContents.executeJavaScript(`
-                            if (typeof exportData === 'function') {
-                                exportData('word');
-                            } else {
-                                console.log('Función exportData no encontrada');
-                            }
-                        `);
-                    }
-                },
-                {
                     label: getMenuTranslation('menu.export_pdf'),
                     accelerator: 'CmdOrCtrl+Shift+P',
                     click: () => {
