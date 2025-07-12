@@ -1,76 +1,50 @@
-# 🎤 SHW Reader - Lector de Archivos Wireless Workbench
 
-Aplicación para leer y editar archivos .shw de Wireless Workbench con dos versiones disponibles: **Escritorio (Tkinter)** y **Web (Flask)**.
+# SHW Reader - Lector de Archivos Wireless Workbench
 
-## 🚀 Características
+Aplicación profesional para visualizar y editar archivos .shw de Wireless Workbench. Disponible en versión de escritorio y web.
 
-### ✨ Funcionalidades Principales
-- **Lectura de archivos .shw**: Parser completo de XML para extraer dispositivos y canales
-- **Tabla editable**: Edición en vivo de nombres de canales y frecuencias
-- **Selección avanzada**: Cmd+Click, Shift+Click y checkboxes para selección múltiple
-- **Eliminación selectiva**: Borra solo los canales que desees mantener tu lista limpia
-- **Atajos de teclado**: Delete/Backspace para eliminar, Cmd+A/Ctrl+A para seleccionar todo
-- **Exportación CSV**: Guarda los datos editados en formato CSV
-- **Interfaz moderna**: Diseño limpio y profesional
-- **Modo oscuro**: Disponible en la versión web
 
-### 📱 Versión Escritorio (Tkinter)
-**Archivo:** `app_selectable.py`
+## Características principales
+- Lectura de archivos .shw (XML)
+- Edición de nombres de canales y frecuencias
+- Selección múltiple avanzada (Cmd/Ctrl+Click, Shift+Click, checkboxes)
+- Eliminación selectiva de canales
+- Atajos de teclado para selección y borrado
+- Exportación a CSV
+- Interfaz moderna y profesional
+- Modo oscuro en la versión web
 
-#### Características:
-- Interfaz nativa de escritorio
-- Edición por doble clic en celdas
-- **Selección avanzada**: Cmd+Click (múltiple), Shift+Click (rango)
-- **Checkboxes de selección** con "Seleccionar todo"
-- **Atajos de teclado**: Delete/Backspace para eliminar, Cmd+A para seleccionar todo
-- **Eliminación de filas seleccionadas** con confirmación
-- Barras de desplazamiento automáticas
-- Exportación directa a CSV
-- Compatible con macOS, Windows y Linux
 
-#### Cómo usar:
+### Versión Escritorio
+**Archivo principal:** `app_selectable.py`
+
+Características:
+- Interfaz nativa multiplataforma
+- Edición directa en tabla
+- Selección múltiple y atajos de teclado
+- Exportación a CSV
+
+Uso rápido:
 ```bash
 python3 app_selectable.py
 ```
 
-#### Controles:
-- **📁 Abrir archivo .shw**: Selecciona y carga un archivo
-- **🗑️ Limpiar**: Limpia la tabla actual
-- **💾 Exportar CSV**: Guarda los datos en formato CSV
-- **🗑️ Eliminar Seleccionados**: Borra las filas marcadas
-- **☑️ Checkboxes**: Selecciona filas individuales o todas
-- **⌘+Click / Ctrl+Click**: Selección múltiple (agregar/quitar filas)
-- **⇧+Click**: Selección de rango (desde la última fila hasta la actual)
-- **⌘+A / Ctrl+A**: Seleccionar todas las filas
-- **Delete / Backspace**: Eliminar filas seleccionadas
-- **Doble clic**: En nombres de canales y frecuencias para editar
 
-### 🌐 Versión Web (Flask)
-**Archivos:** `app_web_dark.py` + `templates/index_dark.html`
+### Versión Web (Flask)
+**Archivos principales:** `app_web_dark.py`, `templates/index_dark.html`
 
-#### Características:
-- **Modo oscuro por defecto** con gradientes modernos
-- **Diseño minimalista** y responsive
-- **Drag & drop** para cargar archivos
-- **Edición en línea** con un clic
-- **Selección avanzada**: Cmd+Click (múltiple), Shift+Click (rango)
-- **Selección múltiple** con checkboxes estilizados
-- **Atajos de teclado**: Delete/Backspace, Cmd+A/Ctrl+A
-- **Eliminación selectiva** de canales no deseados
-- **Estadísticas en tiempo real**
-- **Animaciones suaves** y efectos visuales
-- **Compatible móvil**
+Características:
+- Modo oscuro y diseño responsive
+- Drag & drop para cargar archivos
+- Edición y selección múltiple en línea
+- Exportación a CSV
 
-#### Cómo usar:
+Uso rápido:
 ```bash
-# Instalar dependencias (si no están instaladas)
 pip3 install flask
-
-# Ejecutar la aplicación
 python3 app_web_dark.py
 ```
-
-Luego abre: `http://localhost:5000`
+Abre: http://localhost:5000
 
 #### Controles Web:
 - **Drag & Drop**: Arrastra archivos .shw directamente a la ventana
@@ -87,7 +61,8 @@ Luego abre: `http://localhost:5000`
 - **🗑️ Eliminar Seleccionados**: Borra solo las filas marcadas
 - **🧹 Limpiar tabla**: Borra todos los datos
 
-## 📊 Formato de Datos
+
+## Formato de datos
 
 La aplicación extrae los siguientes campos de archivos .shw:
 
@@ -99,7 +74,8 @@ La aplicación extrae los siguientes campos de archivos .shw:
 | **RF Zone** | Zona de RF configurada | ❌ |
 | **Banda** | Banda de frecuencia | ❌ |
 
-## 🎯 Selección y Eliminación de Canales
+
+## Selección y eliminación de canales
 
 ### ¿Por qué es útil?
 Cuando trabajas con archivos .shw grandes, es común que tengas canales que no necesitas o que quieras eliminar para limpiar tu lista. Esta funcionalidad te permite:
@@ -141,7 +117,8 @@ Cuando trabajas con archivos .shw grandes, es común que tengas canales que no n
 4. ⚡ **Eliminación inmediata**: Sin recarga de página
 5. 📊 **Contador en tiempo real**: Ve cuántas filas has seleccionado
 
-## 🎨 Diseño Visual
+
+## Diseño visual
 
 ### Versión Web - Modo Oscuro
 - **Colores principales**: Gradientes oscuros (#1a1a1a → #0f0f0f)
@@ -156,7 +133,8 @@ Cuando trabajas con archivos .shw grandes, es común que tengas canales que no n
 - **Iconos**: Emojis para mejor UX
 - **Layout**: Distribución clásica de escritorio
 
-## 🔧 Estructura del Proyecto
+
+## Estructura del proyecto
 
 ```
 /
@@ -168,7 +146,8 @@ Cuando trabajas con archivos .shw grandes, es común que tengas canales que no n
 └── README.md                     # Esta documentación
 ```
 
-## 🐛 Solución de Problemas
+
+## Solución de problemas
 
 ### Versión Tkinter
 - **macOS**: Las advertencias de deprecation están silenciadas automáticamente
@@ -180,7 +159,8 @@ Cuando trabajas con archivos .shw grandes, es común que tengas canales que no n
 - **Flask no instalado**: `pip3 install flask`
 - **Archivos grandes**: Límite de 16MB configurado
 
-## 📈 Próximas Mejoras
+
+## Próximas mejoras
 
 - [ ] **Validación de frecuencias**: Verificar rangos válidos
 - [ ] **Filtros avanzados**: Por banda, zona, dispositivo
@@ -195,7 +175,8 @@ Cuando trabajas con archivos .shw grandes, es común que tengas canales que no n
 - [ ] **Multi-archivo**: Cargar múltiples .shw simultáneamente
 - [ ] **Exportar a .shw**: Generar archivos Wireless Workbench editados
 
-## 🎯 Recomendación de Uso
+
+## Recomendación de uso
 
 ### Para uso casual/personal:
 **Versión Web** - Más moderna, fácil de usar, mejor experiencia visual
@@ -206,7 +187,8 @@ Cuando trabajas con archivos .shw grandes, es común que tengas canales que no n
 ### Para desarrollo/testing:
 **Versión Escritorio** - Más rápida para desarrollo, no requiere servidor web
 
-## 📦 Aplicación Nativa macOS (COMPLETADA)
+
+## Aplicación nativa macOS
 
 ### ✅ **Aplicación lista para usar**
 
@@ -249,4 +231,5 @@ npm run build
 
 ---
 
-**Desarrollado con ❤️ para técnicos de audio profesional**
+
+Desarrollado para técnicos de audio profesional y usuarios que buscan eficiencia y claridad.
