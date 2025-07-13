@@ -1,6 +1,6 @@
 {
   "name": "shw-reader-macos",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "SHW Reader - Lector de Archivos Wireless Workbench para macOS",
   "main": "electron-main.js",
   "scripts": {
@@ -49,6 +49,7 @@
       "assets/**/*",
       "package.json",
       "requirements.txt"
+      ,"dist/shwreader-backend/**/*"
     ],
     "extraResources": [
       {
@@ -70,11 +71,16 @@
       {
         "from": "translations",
         "to": "app/translations"
+      },
+      {
+        "from": "dist/shwreader-backend",
+        "to": "dist/shwreader-backend"
       }
     ],
     "mac": {
       "icon": "assets/mac/SHW Reader.icns",
       "category": "public.app-category.utilities",
+      "artifactName": "SHW Reader-${version}-${arch}.${ext}",
       "target": [
         {
           "target": "dmg",
@@ -99,7 +105,7 @@
       "gatekeeperAssess": false
     },
     "dmg": {
-      "title": "SHW Reader Installer",
+      "title": "SHW Reader v1.0.2 Installer",
       "icon": "assets/mac/SHW Reader.icns",
       "contents": [
         {

@@ -46,51 +46,32 @@ python3 app_web_dark.py
 ```
 Abre: http://localhost:5000
 
-#### Controles Web:
-- **Drag & Drop**: Arrastra archivos .shw directamente a la ventana
-- **📁 Seleccionar archivo**: Botón de carga tradicional
-- **☑️ Selección múltiple**: Checkboxes individuales y "Seleccionar todo"
-- **⌘+Click / Ctrl+Click**: Selección múltiple (toggle individual)
-- **⇧+Click**: Selección de rango (desde la última fila seleccionada)
-- **⌘+A / Ctrl+A**: Seleccionar todas las filas
-- **Delete / Backspace**: Eliminar filas seleccionadas
-- **Clic simple**: En nombres de canales y frecuencias para editar
-- **Enter**: Guarda la edición
-- **Escape**: Cancela la edición
-- **💾 Exportar CSV**: Descarga automática
-- **🗑️ Eliminar Seleccionados**: Borra solo las filas marcadas
-- **🧹 Limpiar tabla**: Borra todos los datos
 
 
-## Formato de datos
+# SHW Reader v1.0.2
 
-La aplicación extrae los siguientes campos de archivos .shw:
+**SHW Reader** es una aplicación de escritorio para visualizar y exportar datos de archivos Wireless Workbench (.shw) de Shure.
 
-| Campo | Descripción | Editable |
-|-------|-------------|----------|
-| **Dispositivo/Modelo** | Nombre del dispositivo y modelo | ❌ |
-| **Nombre del Canal** | Nombre asignado al canal | ✅ |
-| **Frecuencia** | Frecuencia en MHz | ✅ |
-| **RF Zone** | Zona de RF configurada | ❌ |
-| **Banda** | Banda de frecuencia | ❌ |
+## Instalación
 
+1. Descarga el instalador para tu sistema operativo desde la sección de releases.
+2. Instala la aplicación siguiendo el asistente.
+3. Abre SHW Reader y comienza a importar tus archivos .shw.
 
-## Selección y eliminación de canales
+## Uso básico
 
-### ¿Por qué es útil?
-Cuando trabajas con archivos .shw grandes, es común que tengas canales que no necesitas o que quieras eliminar para limpiar tu lista. Esta funcionalidad te permite:
+1. Haz clic en “Importar archivo” y selecciona un archivo .shw.
+2. Visualiza la tabla de dispositivos y canales.
+3. Exporta los datos a CSV si lo necesitas.
 
-- **Seleccionar canales específicos** que quieres eliminar
-- **Mantener solo los canales relevantes** para tu proyecto
-- **Limpiar listas grandes** de manera eficiente
-- **Preservar la configuración** de los canales que sí necesitas
+## Requisitos
 
-### Cómo usar la selección:
+- macOS 10.15+ (Apple Silicon y Intel)
+- No requiere Python ni dependencias externas
 
-#### 🖱️ Métodos de Selección:
+## Licencia
 
-**Selección Simple:**
-- **Clic normal**: Selecciona una sola fila (deselecciona las demás)
+Este proyecto está bajo la licencia MIT.
 - **Checkbox individual**: Marca/desmarca una fila específica
 
 **Selección Múltiple:**

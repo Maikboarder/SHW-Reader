@@ -63,111 +63,68 @@ function checkFlaskReady() {
 
 // Función para iniciar el servidor Flask
 async function startFlaskServer() {
-    const pythonCmd = await checkPython();
-    
-    if (!pythonCmd) {
-        dialog.showErrorBox(
-            'Python no encontrado',
-            'Esta aplicación requiere Python 3.x para funcionar. Por favor, instala Python desde python.org'
-        );
-        app.quit();
-        return;
-    }
-
-    // Verificar si Flask está instalado
-    return new Promise((resolve, reject) => {
-        const flaskCheck = spawn(pythonCmd, ['-c', 'import flask; print("Flask OK")']);
-        
-        flaskCheck.on('error', () => {
-            reject('Error al verificar Flask');
-        });
-        
-        flaskCheck.on('close', (code) => {
-            if (code !== 0) {
+    return new Promise(async (resolve, reject) => {
+        let flaskCmd, flaskArgs, workingDir;
+        if (app.isPackaged) {
+            // Ejecutar binario standalone
+            // Buscar el binario en posibles ubicaciones
+            const possibleBinPaths = [
+                path.join(process.resourcesPath, 'app', 'dist', 'shwreader-backend', 'shwreader-backend'),
+                path.join(process.resourcesPath, 'dist', 'shwreader-backend', 'shwreader-backend'),
+                path.join(__dirname, 'dist', 'shwreader-backend', 'shwreader-backend'),
+                path.join(process.cwd(), 'dist', 'shwreader-backend', 'shwreader-backend')
+            ];
+            let foundBin = null;
+            for (const testPath of possibleBinPaths) {
+                console.log('Verificando binario:', testPath);
+                if (fs.existsSync(testPath)) {
+                    foundBin = testPath;
+                    break;
+                }
+            }
+            if (!foundBin) {
                 dialog.showErrorBox(
-                    'Flask no encontrado',
-                    'Esta aplicación requiere Flask. Instálalo con: pip3 install flask'
+                    'Binario backend no encontrado',
+                    `No se encontró el ejecutable Flask backend.\nUbicaciones verificadas:\n${possibleBinPaths.join('\n')}`
+                );
+                reject(new Error('No se encontró el binario Flask backend'));
+                return;
+            }
+            flaskCmd = foundBin;
+            flaskArgs = [];
+            workingDir = path.dirname(foundBin);
+        } else {
+            // Desarrollo: usar Python
+            const pythonCmd = await checkPython();
+            if (!pythonCmd) {
+                dialog.showErrorBox(
+                    'Python no encontrado',
+                    'Esta aplicación requiere Python 3.x para funcionar. Por favor, instala Python desde python.org'
                 );
                 app.quit();
                 return;
             }
-            
-            // Iniciar el servidor Flask
-            // Determinar la ruta correcta del archivo Python
-            let appPath;
-            let workingDir;
-            
-            // Lista de posibles ubicaciones para el archivo Python
-            const possiblePaths = [];
-            
-            if (app.isPackaged) {
-                // En modo empaquetado, intentar varias ubicaciones posibles
-                const resourcesPath = process.resourcesPath;
-                const appResourcesPath = path.join(resourcesPath, 'app');
-                
-                possiblePaths.push(
-                    path.join(appResourcesPath, 'app_desktop.py'),
-                    path.join(resourcesPath, 'app_desktop.py'),
-                    path.join(__dirname, 'app_desktop.py'),
-                    path.join(process.cwd(), 'app_desktop.py')
-                );
-            } else {
-                // En modo desarrollo
-                possiblePaths.push(
-                    path.join(__dirname, 'app_desktop.py'),
-                    path.join(process.cwd(), 'app_desktop.py')
-                );
+            flaskCmd = pythonCmd;
+            flaskArgs = [path.join(__dirname, 'app_desktop.py')];
+            workingDir = __dirname;
+        }
+        console.log('Lanzando backend:', flaskCmd, flaskArgs);
+        flaskProcess = spawn(flaskCmd, flaskArgs, {
+            cwd: workingDir,
+            stdio: 'inherit',
+            env: {
+                ...process.env,
+                PORT: FLASK_PORT.toString()
             }
-            
-            // Buscar el archivo en las ubicaciones posibles
-            let foundPath = null;
-            for (const testPath of possiblePaths) {
-                console.log('Verificando ruta:', testPath);
-                if (fs.existsSync(testPath)) {
-                    foundPath = testPath;
-                    console.log('Archivo encontrado en:', foundPath);
-                    break;
-                }
-            }
-            
-            if (!foundPath) {
-                const error = new Error(`No se encontró app_desktop.py en ninguna de las ubicaciones: ${possiblePaths.join(', ')}`);
-                console.error(error.message);
-                dialog.showErrorBox(
-                    'Archivo no encontrado',
-                    `No se encontró el archivo app_desktop.py.\nUbicaciones verificadas:\n${possiblePaths.join('\n')}`
-                );
-                reject(error);
-                return;
-            }
-            
-            appPath = foundPath;
-            workingDir = path.dirname(appPath);
-            
-            console.log('Ejecutando:', appPath);
-            console.log('Directorio de trabajo:', workingDir);
-            console.log('Puerto Flask:', FLASK_PORT);
-            
-            flaskProcess = spawn(pythonCmd, [appPath], {
-                cwd: workingDir,
-                stdio: 'inherit',
-                env: {
-                    ...process.env,
-                    PORT: FLASK_PORT.toString()
-                }
-            });
-            
-            flaskProcess.on('error', (err) => {
-                console.error('Error al iniciar Flask:', err);
-                reject(err);
-            });
-            
-            // Esperar un momento para que el servidor se inicie
-            setTimeout(() => {
-                console.log('Flask debería estar listo ahora');
-                resolve();
-            }, 3000); // Aumentar a 3 segundos
         });
+        flaskProcess.on('error', (err) => {
+            console.error('Error al iniciar backend:', err);
+            reject(err);
+        });
+        setTimeout(() => {
+            console.log('Backend debería estar listo ahora');
+            resolve();
+        }, 3000);
     });
 }
 
