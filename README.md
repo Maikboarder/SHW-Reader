@@ -60,8 +60,6 @@
 
 ---
 
-## 🇪🇸 Español
-
 **SHW Reader** es una aplicación de escritorio para visualizar y exportar datos de archivos Wireless Workbench (.shw) de Shure.
 
 - Exportación a CSV y PDF
@@ -91,8 +89,6 @@ Si SHW Reader te resulta útil, puedes ayudar a su desarrollo:
 3. Exporta los datos a CSV o PDF si lo necesitas.
 
 ---
-
-## 🇬🇧 English
 
 **SHW Reader** is a desktop app to view and export Shure Wireless Workbench (.shw) files.
 
