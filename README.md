@@ -1,18 +1,16 @@
 
 # SHW Reader - Lector de Archivos Wireless Workbench
 
-Aplicación profesional para visualizar y editar archivos .shw de Wireless Workbench. Disponible en versión de escritorio y web.
+Aplicación para visualizar y editar archivos .shw de Wireless Workbench. Disponible en versión de escritorio y web.
 
 
 ## Características principales
-- Lectura de archivos .shw (XML)
+- Lectura de archivos .shw
 - Edición de nombres de canales y frecuencias
 - Selección múltiple avanzada (Cmd/Ctrl+Click, Shift+Click, checkboxes)
 - Eliminación selectiva de canales
 - Atajos de teclado para selección y borrado
-- Exportación a CSV
-- Interfaz moderna y profesional
-- Modo oscuro en la versión web
+- Exportación a CSV y PDF
 
 
 ### Versión Escritorio
@@ -83,79 +81,31 @@ Este proyecto está bajo la licencia MIT.
 - **Delete** o **Backspace**: Elimina las filas seleccionadas
 - **Botón "Eliminar Seleccionados"**: Alternativa visual para eliminar
 
-#### Versión Escritorio:
-1. ☑️ **Checkbox individual**: Marca cada fila que quieres eliminar
-2. ☑️ **Seleccionar todo**: Usa el checkbox del encabezado para seleccionar/deseleccionar todas las filas
-3. 🖱️ **Selección avanzada**: Cmd+Click para múltiple, Shift+Click para rangos
-4. ⌨️ **Atajos de teclado**: Delete para eliminar, Cmd+A para seleccionar todo
-5. 🗑️ **Eliminar seleccionados**: Confirma la eliminación de las filas marcadas
-6. 👁️ **Feedback visual**: Las filas seleccionadas se resaltan en azul
 
-#### Versión Web:
-1. ☑️ **Checkboxes estilizados**: Selección visual moderna con efectos hover
-2. 🎛️ **Estado indeterminado**: El checkbox principal muestra estados parciales
-3. 🖱️ **Clics avanzados**: Cmd+Click y Shift+Click con feedback visual inmediato
-4. ⚡ **Eliminación inmediata**: Sin recarga de página
-5. 📊 **Contador en tiempo real**: Ve cuántas filas has seleccionado
+# SHW Reader v1.0.2
 
+**SHW Reader** es una aplicación de escritorio para visualizar y exportar datos de archivos Wireless Workbench (.shw) de Shure.
 
-## Diseño visual
+## Instalación
 
-### Versión Web - Modo Oscuro
-- **Colores principales**: Gradientes oscuros (#1a1a1a → #0f0f0f)
-- **Acentos**: Azul moderno (#64b5f6) y verde (#81c784)
-- **Tipografía**: Segoe UI con pesos ligeros
-- **Efectos**: Sombras suaves, hover animations, gradientes en botones
-- **Responsive**: Adaptable a móviles y tablets
+1. Descarga el instalador para macOS desde la sección de releases.
+2. Instala la aplicación siguiendo el asistente.
+3. Abre SHW Reader y comienza a importar tus archivos .shw.
 
-### Versión Escritorio
-- **Colores**: Grises suaves con acentos azules
-- **Tabla**: Filas alternadas con separadores visuales
-- **Iconos**: Emojis para mejor UX
-- **Layout**: Distribución clásica de escritorio
+## Uso básico
 
+1. Haz clic en “Importar archivo” y selecciona un archivo .shw.
+2. Visualiza la tabla de dispositivos y canales.
+3. Exporta los datos a CSV si lo necesitas.
 
-## Estructura del proyecto
+## Requisitos
 
-```
-/
-├── app_selectable.py              # Versión Tkinter con selección (escritorio)
-├── app_web_dark.py               # Versión Flask (web oscura)
-├── templates/
-│   └── index_dark.html           # Template web con modo oscuro
-├── uploads/                      # Carpeta temporal para archivos
-└── README.md                     # Esta documentación
-```
+- macOS 10.15+ (Apple Silicon)
+- No requiere Python ni dependencias externas
 
+## Licencia
 
-## Solución de problemas
-
-### Versión Tkinter
-- **macOS**: Las advertencias de deprecation están silenciadas automáticamente
-- **Errores de anchor**: Corregidos en la versión actual
-- **Scroll**: Funciona con rueda del ratón y barras
-
-### Versión Web
-- **Puerto ocupado**: Cambia el puerto en `app.run(port=5001)`
-- **Flask no instalado**: `pip3 install flask`
-- **Archivos grandes**: Límite de 16MB configurado
-
-
-## Próximas mejoras
-
-- [ ] **Validación de frecuencias**: Verificar rangos válidos
-- [ ] **Filtros avanzados**: Por banda, zona, dispositivo
-- [ ] **Ordenamiento**: Columnas ordenables
-- [ ] **Búsqueda**: Filtro de texto en tiempo real
-- [x] **Selección múltiple**: ✅ Implementado - Checkboxes, Cmd+Click, Shift+Click, Delete
-- [x] **Atajos de teclado**: ✅ Implementado - Delete, Backspace, Cmd+A, Ctrl+A
-- [x] **Aplicación nativa macOS**: ✅ Implementado - App nativa con Electron
-- [ ] **Duplicación de canales**: Copiar configuraciones similares
-- [ ] **Temas**: Modo claro para la versión web
-- [ ] **Base de datos**: Persistencia de datos editados
-- [ ] **Multi-archivo**: Cargar múltiples .shw simultáneamente
-- [ ] **Exportar a .shw**: Generar archivos Wireless Workbench editados
-
+MIT
 
 ## Recomendación de uso
 
