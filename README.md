@@ -1,24 +1,84 @@
-# SHW Reader v1.0.2
+# SHW Reader
+
+[![GitHub release](https://img.shields.io/github/release/Maikboarder/SHW-Reader.svg)](https://github.com/Maikboarder/SHW-Reader/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![macOS](https://img.shields.io/badge/platform-macOS%20Silicon-blue?logo=apple)](https://github.com/Maikboarder/SHW-Reader/releases)
+
+<div align="center">
+  <a href="https://buymeacoffee.com/maikboarder"><img src="https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support%20Development-orange?style=for-the-badge&logo=buy-me-a-coffee" alt="Buy Me A Coffee"></a>
+  <a href="https://github.com/sponsors/Maikboarder"><img src="https://img.shields.io/badge/GitHub%20Sponsors-Become%20a%20Sponsor-pink?style=for-the-badge&logo=github-sponsors" alt="GitHub Sponsors"></a>
+</div>
+
+---
+
+## 🇪🇸 Español
 
 **SHW Reader** es una aplicación de escritorio para visualizar y exportar datos de archivos Wireless Workbench (.shw) de Shure.
 
-## Instalación
+- Exportación a CSV y PDF
+- Soporte para macOS 10.15+ (Apple Silicon)
+- Idiomas disponibles: Español, Inglés, Francés, Alemán, Italiano, Portugués, Catalán, Gallego, Euskera
 
-1. Descarga el instalador para macOS desde la sección de releases.
-2. Instala la aplicación siguiendo el asistente.
-3. Abre SHW Reader y comienza a importar tus archivos .shw.
+### 🚀 Descargar
 
-## Uso básico
+[⬇️ Descargar para Mac Silicon (M1/M2/M3)](https://github.com/Maikboarder/SHW-Reader/releases/latest)
 
+> Próximamente: versiones para Windows y Mac Intel
+
+### ☕️ ¡Apoya el proyecto!
+
+Si SHW Reader te resulta útil, puedes ayudar a su desarrollo:
+- [Invítame a un café](https://buymeacoffee.com/maikboarder)
+- [GitHub Sponsors](https://github.com/sponsors/Maikboarder)
+
+### Instalación
+1. Descarga el instalador desde el enlace anterior.
+2. Abre el archivo `.dmg` y arrastra SHW Reader a `Aplicaciones`.
+3. Ejecuta la app y comienza a importar tus archivos .shw.
+
+### Uso básico
 1. Haz clic en “Importar archivo” y selecciona un archivo .shw.
 2. Visualiza la tabla de dispositivos y canales.
-3. Exporta los datos a CSV si lo necesitas.
+3. Exporta los datos a CSV o PDF si lo necesitas.
 
-## Requisitos
+---
 
-- macOS 10.15+ (Apple Silicon)
-- No requiere Python ni dependencias externas
+## 🇬🇧 English
 
-## Licencia
+**SHW Reader** is a desktop app to view and export Shure Wireless Workbench (.shw) files.
+
+- Export to CSV and PDF
+- Supports macOS 10.15+ (Apple Silicon)
+- Available languages: Spanish, English, French, German, Italian, Portuguese, Catalan, Galician, Basque
+
+### 🚀 Download
+
+[⬇️ Download for Mac Silicon (M1/M2/M3)](https://github.com/Maikboarder/SHW-Reader/releases/latest)
+
+> Coming soon: Windows and Mac Intel versions
+
+### ☕️ Support the project!
+
+If SHW Reader is useful for you, please consider supporting development:
+- [Buy Me a Coffee](https://buymeacoffee.com/maikboarder)
+- [GitHub Sponsors](https://github.com/sponsors/Maikboarder)
+
+### Installation
+1. Download the installer from the link above.
+2. Open the `.dmg` file and drag SHW Reader to `Applications`.
+3. Launch the app and start importing your .shw files.
+
+### Basic usage
+1. Click “Import file” and select a .shw file.
+2. View the device and channel table.
+3. Export data to CSV or PDF if needed.
+
+---
+
+## Licencia / License
 
 MIT
+
+---
+
+**Desarrollado por Miguel Fuentes Rodriguez ([Maikboarder](https://github.com/Maikboarder))**
