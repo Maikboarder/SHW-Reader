@@ -6,6 +6,10 @@ yarn-error.log*
 
 # Build outputs
 dist/
+!dist/*.dmg
+!dist/*.dmg.blockmap
+!dist/*.exe
+!dist/*.exe.blockmap
 build/
 out/
 
@@ -125,3 +129,6 @@ uploads/*
 
 # Build cache
 .cache/
+
+# Old files
+README_OLD.md

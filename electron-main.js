@@ -3,10 +3,12 @@ const path = require('path');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const http = require('http');
+const { createFallbackServer } = require('./fallback-server');
+const { EmbeddedFlaskServer } = require('./embedded-flask-manager');
 
 // Variables globales
 let mainWindow;
-let flaskProcess;
+let flaskServer; // Usar el gestor del servidor embebido
 let currentLanguage = 'es'; // Idioma actual
 let menuTranslations = {}; // Cache de traducciones para el menú
 const FLASK_PORT = process.env.FLASK_PORT || 5001;
@@ -23,21 +25,10 @@ function getAppName() {
     }
 }
 
-// Función para verificar si Python está disponible
-function checkPython() {
-    return new Promise((resolve) => {
-        const python = spawn('python3', ['--version']);
-        python.on('error', () => {
-            // Intentar con 'python' si 'python3' no funciona
-            const pythonAlt = spawn('python', ['--version']);
-            pythonAlt.on('error', () => resolve(false));
-            pythonAlt.on('close', () => resolve('python'));
-        });
-        python.on('close', () => resolve('python3'));
-    });
-}
+// TODAS LAS FUNCIONES DE PYTHON EXTERNO REMOVIDAS
+// La aplicación ahora SOLO usa el backend embebido o fallback Node.js
 
-// Función para verificar si Flask está disponible
+// Función para verificar si Flask embebido está disponible
 function checkFlaskReady() {
     return new Promise((resolve) => {
         const checkServer = () => {
@@ -61,72 +52,85 @@ function checkFlaskReady() {
     });
 }
 
-// Función para iniciar el servidor Flask
+// Función para iniciar el servidor Flask (SOLUCIÓN DEFINITIVA)
 async function startFlaskServer() {
-    return new Promise(async (resolve, reject) => {
-        let flaskCmd, flaskArgs, workingDir;
-        if (app.isPackaged) {
-            // Ejecutar binario standalone
-            // Buscar el binario en posibles ubicaciones
-            const possibleBinPaths = [
-                path.join(process.resourcesPath, 'app', 'dist', 'shwreader-backend', 'shwreader-backend'),
-                path.join(process.resourcesPath, 'dist', 'shwreader-backend', 'shwreader-backend'),
-                path.join(__dirname, 'dist', 'shwreader-backend', 'shwreader-backend'),
-                path.join(process.cwd(), 'dist', 'shwreader-backend', 'shwreader-backend')
-            ];
-            let foundBin = null;
-            for (const testPath of possibleBinPaths) {
-                console.log('Verificando binario:', testPath);
-                if (fs.existsSync(testPath)) {
-                    foundBin = testPath;
-                    break;
+    console.log('🚀 === INICIO SERVIDOR DEFINITIVO ===');
+    
+    // Intentar servidor embebido primero
+    flaskServer = new EmbeddedFlaskServer(FLASK_PORT);
+    
+    try {
+        await flaskServer.start();
+        console.log('✅ Servidor embebido iniciado exitosamente');
+        // Mostrar mensaje de éxito al usuario (solo en desarrollo)
+        if (process.env.NODE_ENV === 'development') {
+            setTimeout(() => {
+                if (mainWindow) {
+                    dialog.showMessageBox(mainWindow, {
+                        type: 'info',
+                        title: '🚀 SHW Reader listo',
+                        message: 'Aplicación funcionando correctamente',
+                        detail: `✅ Backend embebido activo
+
+🔧 Funciones disponibles:
+✅ Procesamiento completo de archivos SHW
+✅ Exportación a CSV, Excel, Word y PDF
+✅ Interfaz completa sin dependencias
+✅ Funcionamiento inmediato
+
+🎉 ¡Listo para usar!`,
+                        buttons: ['Perfecto'],
+                        defaultId: 0
+                    });
                 }
-            }
-            if (!foundBin) {
-                dialog.showErrorBox(
-                    'Binario backend no encontrado',
-                    `No se encontró el ejecutable Flask backend.\nUbicaciones verificadas:\n${possibleBinPaths.join('\n')}`
-                );
-                reject(new Error('No se encontró el binario Flask backend'));
-                return;
-            }
-            flaskCmd = foundBin;
-            flaskArgs = [];
-            workingDir = path.dirname(foundBin);
-        } else {
-            // Desarrollo: usar Python
-            const pythonCmd = await checkPython();
-            if (!pythonCmd) {
-                dialog.showErrorBox(
-                    'Python no encontrado',
-                    'Esta aplicación requiere Python 3.x para funcionar. Por favor, instala Python desde python.org'
-                );
-                app.quit();
-                return;
-            }
-            flaskCmd = pythonCmd;
-            flaskArgs = [path.join(__dirname, 'app_desktop.py')];
-            workingDir = __dirname;
+            }, 3000);
         }
-        console.log('Lanzando backend:', flaskCmd, flaskArgs);
-        flaskProcess = spawn(flaskCmd, flaskArgs, {
-            cwd: workingDir,
-            stdio: 'inherit',
-            env: {
-                ...process.env,
-                PORT: FLASK_PORT.toString()
+        return Promise.resolve();
+    } catch (error) {
+        console.error('❌ Error con servidor embebido:', error.message);
+        // NO intentar Python externo, solo fallback Node.js básico
+        console.log('🔄 Usando servidor de emergencia...');
+        try {
+            await createFallbackServer(FLASK_PORT);
+            console.log('✅ Servidor de emergencia iniciado');
+            // Solo mostrar mensaje en caso de que realmente falle el embebido
+            setTimeout(() => {
+                if (mainWindow) {
+                    dialog.showMessageBox(mainWindow, {
+                        type: 'warning',
+                        title: 'Modo básico activo',
+                        message: 'SHW Reader funcionando con limitaciones',
+                        detail: `⚠️ El backend completo no está disponible
+
+🔧 Funciones disponibles:
+✅ Interfaz de usuario
+✅ Visualización básica de archivos SHW
+❌ Exportación completa (CSV, Excel, Word, PDF)
+❌ Procesamiento avanzado
+
+💡 Reinicie la aplicación para reintentar el modo completo.`,
+                        buttons: ['Continuar'],
+                        defaultId: 0
+                    });
+                }
+            }, 2000);
+            return Promise.resolve();
+        } catch (fallbackError) {
+            console.error('❌ Error crítico - todos los servidores fallaron');
+            if (mainWindow) {
+                dialog.showErrorBox(
+                    'Error crítico',
+                    `No se pudo iniciar ningún servidor.\n\nErrores:\n- Servidor embebido: ${error.message}\n- Servidor emergencia: ${fallbackError.message}\n\nLa aplicación se cerrará.`
+                );
             }
-        });
-        flaskProcess.on('error', (err) => {
-            console.error('Error al iniciar backend:', err);
-            reject(err);
-        });
-        setTimeout(() => {
-            console.log('Backend debería estar listo ahora');
-            resolve();
-        }, 3000);
-    });
+            app.quit();
+            return Promise.reject(new Error('Fallo crítico de todos los servidores'));
+        }
+    }
 }
+
+// TODAS LAS FUNCIONES OBSOLETAS DE PYTHON REMOVIDAS
+// La aplicación funciona SOLO con backend embebido + fallback Node.js
 
 // Función para crear la ventana principal
 async function createMainWindow() {
@@ -256,7 +260,7 @@ function createMenu() {
                         dialog.showMessageBox(mainWindow, {
                             type: 'info',
                             title: getMenuTranslation('menu.about'),
-                            message: `${getAppName()} v1.0.0`,
+                            message: `${getAppName()} v1.0.1`,
                             detail: getMenuTranslation('about.description'),
                             icon: path.join(__dirname, 'assets', 'mac', 'SHW Reader', 'icon.iconset', 'icon_128x128.png')
                         });
@@ -739,9 +743,10 @@ app.on('window-all-closed', () => {
 });
 
 app.on('before-quit', () => {
-    // Terminar el proceso de Flask
-    if (flaskProcess) {
-        flaskProcess.kill();
+    // Terminar el servidor Flask embebido
+    if (flaskServer && flaskServer.isServerRunning()) {
+        console.log('🛑 Cerrando servidor embebido...');
+        flaskServer.stop();
     }
 });
 
@@ -755,3 +760,5 @@ app.on('web-contents-created', (event, contents) => {
         }
     });
 });
+
+// ARCHIVO COMPLETAMENTE LIMPIO - SOLO BACKEND EMBEBIDO
