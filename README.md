@@ -11,6 +11,55 @@
 
 ---
 
+## ⚠️ Importante para usuarios de macOS
+
+**SHW Reader NO está firmada ni notarizada por Apple.**
+
+- En las versiones recientes de macOS, Gatekeeper puede bloquear la app descargada (tanto en .dmg como en .zip) mostrando el mensaje:
+  > “El archivo está dañado y debe trasladarse a la papelera”
+- Esto ocurre porque la app contiene binarios embebidos y no está firmada con un Apple Developer ID.
+- No hay forma de evitar este mensaje para todos los usuarios sin pagar a Apple y firmar/notarizar la app.
+- Incluso usando .zip, macOS puede bloquear la app.
+
+### ¿Qué puedes hacer?
+- Si eres usuario avanzado, puedes intentar quitar la cuarentena tras descomprimir/copiar la app:
+  ```sh
+  xattr -dr com.apple.quarantine "/ruta/a/SHW Reader.app"
+  ```
+- Si el sistema sigue bloqueando la app, **no hay solución universal sin firma y notarización**.
+- Para uso personal, puedes desactivar temporalmente Gatekeeper (no recomendado):
+  ```sh
+  sudo spctl --master-disable
+  ```
+- Para distribución pública, es imprescindible firmar y notarizar la app.
+
+---
+
+## 🛠️ Cómo compilar SHW Reader en macOS
+
+1. Clona el repositorio:
+   ```sh
+   git clone https://github.com/Maikboarder/SHW-Reader.git
+   cd SHW-Reader
+   ```
+2. Instala dependencias:
+   ```sh
+   npm install
+   pip3 install -r requirements.txt
+   ```
+3. Genera el ejecutable backend:
+   ```sh
+   npm run build:mac-silicon
+   ```
+   El instalador .dmg y la app estarán en la carpeta `dist/`.
+4. (Opcional) Comprime la app en .zip para compartir:
+   ```sh
+   cd dist/mac-arm64
+   zip -r "SHW Reader-1.0.2-arm64.zip" "SHW Reader.app"
+   ```
+
+---
+
 ## 🇪🇸 Español
 
 **SHW Reader** es una aplicación de escritorio para visualizar y exportar datos de archivos Wireless Workbench (.shw) de Shure.
