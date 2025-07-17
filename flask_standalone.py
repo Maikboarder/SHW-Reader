@@ -85,96 +85,120 @@ def allowed_file(filename):
 
 def process_shw_file(filepath):
     """Procesar archivo SHW y extraer datos"""
+    import xml.etree.ElementTree as ET
     try:
         channels = []
-        
-        with zipfile.ZipFile(filepath, 'r') as zip_file:
-            file_list = zip_file.namelist()
-            print(f"Archivos en SHW: {file_list}")
-            
-            # Buscar archivos de coordinación
-            coordination_files = [f for f in file_list if f.endswith('.wwcoordination')]
-            
-            if not coordination_files:
-                return {
-                    'success': False,
-                    'error': 'No se encontraron archivos de coordinación en el archivo SHW'
+        exclude_models = {"ADX2", "ADX1", "ADX1M", "ADXR"}
+        with open(filepath, 'r', encoding='utf-8') as f:
+            xml_data = f.read()
+        # Extraer solo el bloque <inventory>...</inventory>
+        import re
+        match = re.search(r'<inventory[\s\S]*?</inventory>', xml_data)
+        if not match:
+            raise Exception('No se encontró bloque <inventory> en el archivo')
+        inventory_xml = match.group(0)
+        # Normalizar tag de apertura
+        inventory_xml = inventory_xml.replace('<inventory version="2.1">', '<inventory>')
+        # Parsear XML
+        root = ET.fromstring(inventory_xml)
+        channel_id = 1
+        for device in root.findall('device'):
+            def get_text(tag, node=device):
+                el = node.find(tag)
+                if el is not None and el.text:
+                    return el.text.strip()
+                return ''
+            def get_cdata(tag, node=device):
+                el = node.find(tag)
+                if el is not None and el.text:
+                    return el.text.strip()
+                return ''
+            model = get_text('model')
+            manufacturer = get_text('manufacturer')
+            band = get_text('band')
+            zone = get_text('zone')
+            device_name = get_cdata('device_name')
+            device_channel_name = get_cdata('channel_name')
+            device_frequency_raw = get_text('frequency')
+            def format_freq(freq):
+                try:
+                    # Si es entero, formatear como xxx,xxx
+                    freq_int = int(freq)
+                    return f"{freq_int//1000},{freq_int%1000:03d}"
+                except:
+                    return freq
+            device_frequency = format_freq(device_frequency_raw) if device_frequency_raw else ''
+            exclude_prefixes = ("ADX2", "ADX1", "ADX1M", "ADXR", "SBRC")
+            if any(model.startswith(prefix) for prefix in exclude_prefixes):
+                continue
+            # Si no hay canales hijos, usar los del device
+            child_channels = device.findall('channel')
+            if not child_channels and (device_channel_name or device_frequency):
+                name_val = device_channel_name or model or f"Canal {channel_id}"
+                channel = {
+                    'id': channel_id,
+                    'channel_name': device_channel_name,
+                    'name': name_val,
+                    'frequency': device_frequency,
+                    'zone': zone,
+                    'model': model,
+                    'manufacturer': manufacturer,
+                    'band': band,
+                    'device_name': device_name
                 }
-            
-            # Procesar el primer archivo de coordinación encontrado
-            coord_file = coordination_files[0]
-            print(f"Procesando archivo de coordinación: {coord_file}")
-            
-            with zip_file.open(coord_file) as coord:
-                coord_data = coord.read().decode('utf-8')
-                
-                # Parsear el XML básico para extraer canales
-                lines = coord_data.split('\n')
-                channel_id = 1
-                
-                for line in lines:
-                    line = line.strip()
-                    
-                    # Buscar elementos de canal
-                    if '<Channel ' in line or '<channel ' in line:
-                        try:
-                            # Extraer atributos básicos
-                            name = 'Canal ' + str(channel_id)
-                            frequency = '500.000'  # Valor por defecto
-                            group = 'A'
-                            device_type = 'Wireless'
-                            band = 'UHF'
-                            
-                            # Buscar nombre en el XML
-                            if 'Name="' in line:
-                                start = line.find('Name="') + 6
-                                end = line.find('"', start)
-                                if end > start:
-                                    name = line[start:end]
-                            
-                            # Buscar frecuencia
-                            if 'Frequency="' in line:
-                                start = line.find('Frequency="') + 11
-                                end = line.find('"', start)
-                                if end > start:
-                                    freq_val = line[start:end]
-                                    try:
-                                        # Convertir a MHz
-                                        freq_hz = float(freq_val)
-                                        frequency = f"{freq_hz / 1000000:.3f}"
-                                    except:
-                                        frequency = freq_val
-                            
-                            # Buscar grupo
-                            if 'Group="' in line:
-                                start = line.find('Group="') + 7
-                                end = line.find('"', start)
-                                if end > start:
-                                    group = line[start:end]
-                            
-                            channel = {
-                                'id': channel_id,
-                                'name': name,
-                                'frequency': frequency,
-                                'group': group,
-                                'device_type': device_type,
-                                'band': band
-                            }
-                            
-                            channels.append(channel)
-                            channel_id += 1
-                            
-                        except Exception as e:
-                            print(f"Error procesando línea: {line[:100]}... Error: {e}")
-                            continue
-        
+                channels.append(channel)
+                channel_id += 1
+            # Si hay canales hijos, extraer channel_name y frequency de cada uno si existen
+            for idx, channel_tag in enumerate(child_channels, 1):
+                color = ''
+                tags = ''
+                color_el = channel_tag.find('color')
+                if color_el is not None and color_el.text:
+                    color = color_el.text.strip()
+                tags_el = channel_tag.find('tags')
+                if tags_el is not None and tags_el.text:
+                    tags = tags_el.text.strip()
+                # Buscar <channel_name> y <frequency> aunque tengan atributos
+                channel_name = device_channel_name
+                for cname in channel_tag.findall('channel_name'):
+                    if cname.text and cname.text.strip():
+                        channel_name = cname.text.strip()
+                        break
+                frequency_raw = device_frequency_raw
+                for freq in channel_tag.findall('frequency'):
+                    if freq.text and freq.text.strip():
+                        frequency_raw = freq.text.strip()
+                        break
+                frequency = format_freq(frequency_raw) if frequency_raw else device_frequency
+                # Si no hay nombre, usar modelo y número de canal
+                name_val = channel_name or model or f"Canal {channel_id}"
+                # Excluir canales hijos cuyo modelo empiece por los prefijos
+                exclude_prefixes = ("ADX2", "ADX1", "ADX1M", "ADXR", "SBRC")
+                if any(model.startswith(prefix) for prefix in exclude_prefixes):
+                    continue
+                channel = {
+                    'id': channel_id,
+                    'channel_name': channel_name,
+                    'channel': channel_name,
+                    'name': name_val,
+                    'frequency': frequency,
+                    'zone': zone,
+                    'model': model,
+                    'model_type': model,
+                    'manufacturer': manufacturer,
+                    'band': band,
+                    'device_name': device_name,
+                    'color': color,
+                    'tags': tags
+                }
+                channels.append(channel)
+                channel_id += 1
         return {
             'success': True,
             'channels': channels,
             'total': len(channels),
             'filename': os.path.basename(filepath)
         }
-        
     except Exception as e:
         print(f"Error procesando archivo SHW: {e}")
         return {
@@ -237,19 +261,32 @@ def upload_file():
             
             # Procesar el archivo SHW
             result = process_shw_file(filepath)
-            
+
+            # Preparar respuesta para el frontend
             if result['success']:
                 current_data = result['channels']
                 current_filename = filename
                 print(f"Archivo procesado exitosamente: {len(result['channels'])} canales encontrados")
-            
+                response = {
+                    'success': True,
+                    'data': result['channels'],
+                    'devices': result['total'],
+                    'rows': result['total'],
+                    'filename': result.get('filename', filename)
+                }
+            else:
+                response = {
+                    'success': False,
+                    'error': result.get('error', 'Error desconocido')
+                }
+
             # Limpiar archivo temporal
             try:
                 os.remove(filepath)
             except:
                 pass
-            
-            return jsonify(result)
+
+            return jsonify(response)
         
         return jsonify({'success': False, 'error': 'Tipo de archivo no permitido'})
         
