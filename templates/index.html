@@ -1279,24 +1279,20 @@
             
             // Ordenar los datos
             tableData.sort((a, b) => {
-                let aVal = a[column];
-                let bVal = b[column];
-                
-                // Manejo especial para frecuencias (convertir a número)
-                if (column === 'frequency') {
-                    // Convertir frecuencias a números para comparación numérica
-                    aVal = aVal === 'N/A' ? -1 : parseFloat(aVal);
-                    bVal = bVal === 'N/A' ? -1 : parseFloat(bVal);
+                let aVal, bVal;
+                if (column === 'device') {
+                    aVal = (a.model_type || '').toString().toLowerCase();
+                    bVal = (b.model_type || '').toString().toLowerCase();
+                } else if (column === 'frequency') {
+                    aVal = a[column] === 'N/A' ? -1 : parseFloat(a[column]);
+                    bVal = b[column] === 'N/A' ? -1 : parseFloat(b[column]);
                 } else {
-                    // Para otros campos, comparación alfabética (case-insensitive)
-                    aVal = (aVal || '').toString().toLowerCase();
-                    bVal = (bVal || '').toString().toLowerCase();
+                    aVal = (a[column] || '').toString().toLowerCase();
+                    bVal = (b[column] || '').toString().toLowerCase();
                 }
-                
                 let comparison = 0;
                 if (aVal < bVal) comparison = -1;
                 else if (aVal > bVal) comparison = 1;
-                
                 return currentSortDirection === 'asc' ? comparison : -comparison;
             });
             
